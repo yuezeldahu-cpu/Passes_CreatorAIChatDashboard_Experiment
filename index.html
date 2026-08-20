@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>passes · creator dashboard</title>
+  <meta name="description" content="Passes creator dashboard with an AI copilot that builds automated messages and schedules content smartly." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- ========== TOP NAV ========== -->
+  <header class="topbar">
+    <div class="topbar__left">
+      <a class="wordmark" href="#" aria-label="passes home">
+        <span class="wordmark__mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="28" height="28">
+            <defs>
+              <linearGradient id="pGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#67E3F9" />
+                <stop offset="1" stop-color="#0E7090" />
+              </linearGradient>
+            </defs>
+            <path d="M7 26V9a5 5 0 0 1 5-5h7a7 7 0 0 1 0 14h-6l-3 4z" fill="url(#pGrad)" />
+          </svg>
+        </span>
+        <span class="wordmark__text">passes</span>
+      </a>
+      <nav class="mainnav" aria-label="Primary">
+        <a href="#" class="mainnav__item is-active">Home</a>
+        <a href="#" class="mainnav__item">Messages</a>
+        <a href="#" class="mainnav__item">Tools</a>
+        <a href="#" class="mainnav__item">Marketplace</a>
+        <a href="#" class="mainnav__item">Insights</a>
+      </nav>
+    </div>
+    <div class="topbar__right">
+      <button class="iconbtn" aria-label="Notifications" title="Notifications">🔔</button>
+      <div class="avatar" title="Ava Rivera">AR</div>
+    </div>
+  </header>
+
+  <!-- ========== LAYOUT ========== -->
+  <div class="layout">
+    <!-- MAIN COLUMN -->
+    <main class="main" id="main">
+      <div class="pagehead">
+        <div>
+          <h1 class="pagehead__title">Dashboard</h1>
+          <p class="pagehead__sub">Welcome back, Ava. Here is what is moving today.</p>
+        </div>
+        <button class="btn btn--ghost" id="openChatMobile">Ask your copilot</button>
+      </div>
+
+      <!-- STATS -->
+      <section class="stats" id="statsRow" aria-label="Key metrics"></section>
+
+      <!-- TABS -->
+      <nav class="tabs" role="tablist" aria-label="Dashboard sections">
+        <button class="tab is-active" role="tab" data-tab="overview">Overview</button>
+        <button class="tab" role="tab" data-tab="scheduler">Smart Scheduler</button>
+        <button class="tab" role="tab" data-tab="automations">Automated Messages</button>
+      </nav>
+
+      <section class="tabpanel is-active" data-panel="overview" id="panel-overview"></section>
+      <section class="tabpanel" data-panel="scheduler" id="panel-scheduler"></section>
+      <section class="tabpanel" data-panel="automations" id="panel-automations"></section>
+    </main>
+
+    <!-- COPILOT PANEL -->
+    <aside class="copilot" id="copilot" aria-label="AI copilot">
+      <div class="copilot__head">
+        <div class="copilot__id">
+          <span class="copilot__dot" aria-hidden="true"></span>
+          <div>
+            <div class="copilot__name">Copilot</div>
+            <div class="copilot__status">Ready to schedule &amp; automate</div>
+          </div>
+        </div>
+        <button class="iconbtn copilot__close" id="closeChat" aria-label="Collapse copilot">×</button>
+      </div>
+      <div class="chat" id="chatLog" aria-live="polite"></div>
+      <div class="chat__suggest" id="chatSuggest"></div>
+      <form class="composer" id="composer" autocomplete="off">
+        <input class="composer__input" id="chatInput" type="text"
+               placeholder="Try: schedule a post for tomorrow at the best time" aria-label="Message your copilot" />
+        <button class="composer__send" type="submit" aria-label="Send">↑</button>
+      </form>
+    </aside>
+  </div>
+
+  <!-- FLOATING OPEN BUTTON (when collapsed) -->
+  <button class="fab" id="openChat" hidden aria-label="Open copilot">
+    <span aria-hidden="true">✦</span> Copilot
+  </button>
+
+  <!-- MODAL HOST -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal__backdrop" data-close-modal></div>
+    <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="modalTitle" id="modalCard"></div>
+  </div>
+
+  <!-- TOASTS -->
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <!-- SCRIPTS (plain, ordered, no build step) -->
+  <script src="js/data.js"></script>
+  <script src="js/scheduler.js"></script>
+  <script src="js/automations.js"></script>
+  <script src="js/nlu.js"></script>
+  <script src="js/chatbot.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

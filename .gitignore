@@ -1,0 +1,15 @@
+# dependencies / test tooling (prototype is pure static, no build)
+node_modules/
+package.json
+package-lock.json
+
+# scratch + local artifacts
+scratch-*
+*.png
+!docs/**/*.png
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
