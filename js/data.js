@@ -76,13 +76,42 @@
     { id: "engaged", name: "Highly engaged", size: 1560 }
   ];
 
-  /* --- Dashboard stats ------------------------------------ */
-  var stats = [
-    { label: "Revenue (30d)", value: "$48,210", delta: "+12.4%", dir: "up" },
-    { label: "Active subs", value: "4,820", delta: "+318", dir: "up" },
-    { label: "Msgs sent (7d)", value: "12,940", delta: "+8.1%", dir: "up" },
-    { label: "Scheduled", value: "0", delta: "queue", dir: "flat" }
+  /* --- Dashboard stats (4 product metrics, per time range) -
+     "This Week" matches the reference screenshot (all zeros).
+  --------------------------------------------------------- */
+  var STAT_LABELS = ["New Profile Visits", "New Memberships", "1:1 DM Revenue", "Membership Revenue"];
+  var RANGES = [
+    { id: "today", label: "Today" },
+    { id: "week", label: "This Week" },
+    { id: "month", label: "This Month" },
+    { id: "all", label: "All Time" }
   ];
+  var rangeStats = {
+    today: [
+      { value: "8" },
+      { value: "0" },
+      { value: "$0.00" },
+      { value: "$0.00" }
+    ],
+    week: [
+      { value: "0" },
+      { value: "0" },
+      { value: "$0.00" },
+      { value: "$0.00" }
+    ],
+    month: [
+      { value: "1,284", delta: "+18%", dir: "up" },
+      { value: "42", delta: "+9", dir: "up" },
+      { value: "$1,320.00", delta: "+24%", dir: "up" },
+      { value: "$6,940.00", delta: "+12%", dir: "up" }
+    ],
+    all: [
+      { value: "38,510" },
+      { value: "1,206" },
+      { value: "$14,880.00" },
+      { value: "$92,300.00" }
+    ]
+  };
 
   /* --- Automated Messages: trigger catalog (20+ triggers) -
      Grouped so the chatbot and UI can suggest the right one.
@@ -228,7 +257,9 @@
     bestWindows: bestWindows,
     bestHourForDay: bestHourForDay,
     segments: segments,
-    stats: stats,
+    STAT_LABELS: STAT_LABELS,
+    RANGES: RANGES,
+    rangeStats: rangeStats,
     triggers: triggers,
     triggerById: triggerById,
     queue: queue,

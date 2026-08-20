@@ -297,8 +297,8 @@
       var d = drafts[cardId]; if (!d) return;
       S.addToQueue(d.draft);
       markDone(card);
-      window.App.refresh();
       window.App.switchTab("scheduler");
+      window.App.showCopilot();
       window.App.toast("Added to your queue");
       botSay("<p>Done ✅ it's in your <strong>Smart Scheduler</strong> queue. I'll send it at " + when(d.draft.when) + ". You can edit or cancel anytime.</p>");
       delete drafts[cardId];
@@ -329,8 +329,8 @@
       var d = drafts[cardId]; if (!d) return;
       window.PassesData.automations.unshift(d.draft);
       markDone(card);
-      window.App.refresh();
       window.App.switchTab("automations");
+      window.App.showCopilot();
       window.App.toast("Automation is live");
       botSay("<p>It's live 🚀 New fans hitting <strong>" + (D.triggerById(d.draft.trigger).name) + "</strong> will get this automatically. Open it anytime to tweak the steps.</p>");
       delete drafts[cardId];

@@ -214,6 +214,16 @@
     if (q.smart.price) smartBadges += '<span class="pill">✦ smart price</span>';
     if (q.smart.caption) smartBadges += '<span class="pill">✦ AI caption</span>';
     var priceStr = q.price > 0 ? '$' + q.price + ' unlock' : 'Free';
+    var media = q.media && q.media.length ? q.media : null;
+    var thumb = "";
+    var mediaNote = "";
+    if (media) {
+      var m0 = media[0];
+      thumb = m0.url && m0.kind === "image"
+        ? '<img class="qitem__thumb" src="' + m0.url + '" alt="" />'
+        : '<span class="qitem__thumb" style="display:grid;place-items:center">' + (m0.kind === "video" ? "🎬" : "📄") + '</span>';
+      mediaNote = ' &middot; 📎 ' + media.length + ' media';
+    }
 
     return '' +
       '<div class="qitem" data-id="' + q.id + '">' +
@@ -227,7 +237,7 @@
              '<span class="stat__delta ' + quality.cls + ' small">' + quality.label + '</span>' +
              smartBadges + '</div>' +
       '    <div class="qitem__text">' + esc(q.text) + '</div>' +
-      '    <div class="qitem__sub">To ' + seg + ' &middot; ' + priceStr + '</div>' +
+      '    <div class="qitem__sub">' + thumb + 'To ' + seg + ' &middot; ' + priceStr + mediaNote + '</div>' +
       '  </div>' +
       '  <div class="qitem__actions">' +
       '    <button class="btn btn--ghost btn--sm" data-act="edit">Edit</button>' +

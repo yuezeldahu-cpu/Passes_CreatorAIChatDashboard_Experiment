@@ -1,6 +1,7 @@
 /* ============================================================
-   app.js — dashboard shell: stats, overview, tabs, modals,
-   toasts, copilot open/close, and boot.
+   app.js — shell: sidebar nav, views, stats + range filter,
+   theme toggle, copilot reparenting (centered <-> floating),
+   modals (schedule w/ media upload, automations), toasts, boot.
    Exposes: window.App, window.SchedulerUI, window.AutomationsUI
    ============================================================ */
 (function () {
@@ -9,154 +10,159 @@
   var S = window.Scheduler;
   var A = window.Automations;
 
-  var currentTab = "overview";
+  var currentView = "home";
+  var currentRange = "week"; // matches the reference screenshot
+  var CREATOR = "Ava";
   var els = {};
 
-  /* ---------------- STATS ---------------- */
+  /* ---------------- STATS + HEADER ---------------- */
   function renderStats() {
-    // keep the "scheduled" stat live
-    D.stats[3].value = String(S.scheduledCount());
-    var html = D.stats.map(function (s) {
-      var dcls = s.dir === "up" ? "up" : s.dir === "down" ? "down" : "";
-      var delta = s.dir === "flat"
-        ? '<span class="stat__delta muted">' + s.delta + '</span>'
-        : '<span class="stat__delta ' + dcls + '">' + (s.dir === "up" ? "▲ " : "▼ ") + s.delta + '</span>';
-      return '' +
-        '<div class="stat">' +
-        '  <div class="stat__label">' + s.label + '</div>' +
-        '  <div class="stat__value">' + s.value + '</div>' +
-        delta +
-        '</div>';
+    var rows = D.rangeStats[currentRange] || D.rangeStats.week;
+    els.stats.innerHTML = D.STAT_LABELS.map(function (label, i) {
+      var s = rows[i] || { value: "0" };
+      var delta = s.delta
+        ? '<div class="stat__delta ' + (s.dir || "flat") + '">' + (s.dir === "up" ? "▲ " : s.dir === "down" ? "▼ " : "") + s.delta + '</div>'
+        : "";
+      return '<div class="stat"><div class="stat__label">' + label + '</div>' +
+             '<div class="stat__value">' + s.value + '</div>' + delta + '</div>';
     }).join("");
-    els.stats.innerHTML = html;
   }
 
-  /* ---------------- OVERVIEW ---------------- */
-  function renderOverview() {
-    var next = D.queue.filter(function (q) { return q.status === "scheduled"; })[0];
-    var nextTxt = next
-      ? (next.kind === "dm" ? "Mass DM" : "Post") + " · " + whenShort(next.when)
-      : "Nothing queued";
-    var activeAutos = A.activeCount();
-
-    var tips = [
-      { icon: "🕒", title: "Your fans peak at " + peakLabel(), desc: "Schedule tonight's drop then for the biggest reach. Ask the copilot to queue it." },
-      { icon: "💸", title: "Try a paid mass DM to VIPs", desc: "Your top spenders convert best. A $" + S.suggestPrice({ kind: "dm", audience: "vip" }).mid + " unlock is a strong bet." },
-      { icon: "🔁", title: activeAutos + " automations running", desc: "New subscribers and win-backs are handled on autopilot. Add one for tips or birthdays." }
-    ];
-
-    var html = "";
-    html += '<div class="overview-grid">';
-
-    // left: engagement heatmap
-    html += '<div class="card">';
-    html += '  <div class="card__head"><div><h3 class="card__title">When your fans are online</h3>';
-    html += '  <p class="card__sub">Darker = more active. The copilot schedules into these peaks automatically.</p></div></div>';
-    html += heatmapHTML();
-    html += '</div>';
-
-    // right: what's next + smart tips
-    html += '<div>';
-    html += '  <div class="card">';
-    html += '    <div class="card__head"><div><h3 class="card__title">Up next</h3></div>';
-    html += '    <button class="btn btn--ghost btn--sm" data-goto="scheduler">View queue</button></div>';
-    if (next) {
-      var q = S.timeQuality(next.when);
-      html += '<div class="action-tip">';
-      html += '  <div class="action-tip__icon">' + (next.kind === "dm" ? "💌" : "🖼️") + '</div>';
-      html += '  <div class="action-tip__body"><div class="action-tip__title">' + nextTxt + '</div>';
-      html += '  <div class="action-tip__desc">' + S.esc(trim(next.text, 70)) + '</div>';
-      html += '  <div class="small" style="margin-top:6px"><span class="stat__delta ' + q.cls + '">' + q.label + '</span></div></div>';
-      html += '</div>';
+  function renderHeader() {
+    if (currentView === "home") {
+      els.head.innerHTML =
+        '<div><h1 class="mainhead__title">Welcome back, ' + CREATOR + '!</h1></div>' +
+        rangeFilterHTML();
+      wireRangeFilter();
+    } else if (currentView === "scheduler") {
+      els.head.innerHTML = '<div><h1 class="mainhead__title">Smart Scheduler</h1>' +
+        '<p class="mainhead__sub">Plan posts and mass DMs at the smartest times.</p></div>';
     } else {
-      html += '<div class="empty">Ask the copilot to schedule something 👉</div>';
+      els.head.innerHTML = '<div><h1 class="mainhead__title">Automated Messages</h1>' +
+        '<p class="mainhead__sub">Flows that message fans on autopilot.</p></div>';
     }
-    html += '  </div>';
+  }
 
-    html += '  <div class="card">';
-    html += '    <div class="card__head"><div><h3 class="card__title">Smart tips</h3></div></div>';
-    html += '    <div class="actionlist">';
-    tips.forEach(function (t) {
-      html += '<div class="action-tip"><div class="action-tip__icon">' + t.icon + '</div>' +
-              '<div class="action-tip__body"><div class="action-tip__title">' + t.title + '</div>' +
-              '<div class="action-tip__desc">' + t.desc + '</div></div></div>';
+  function rangeFilterHTML() {
+    var cur = D.RANGES.filter(function (r) { return r.id === currentRange; })[0];
+    var menu = D.RANGES.map(function (r) {
+      return '<button data-range="' + r.id + '" class="' + (r.id === currentRange ? "is-active" : "") + '">' + r.label + '</button>';
+    }).join("");
+    return '<div class="rangefilter" id="rangeFilter">' +
+      '<button class="rangefilter__btn" id="rangeBtn">' + cur.label +
+      ' <svg viewBox="0 0 24 24" class="ic ic-sm"><path d="M6 9l6 6 6-6"/></svg></button>' +
+      '<div class="rangefilter__menu" id="rangeMenu" hidden>' + menu + '</div></div>';
+  }
+  function wireRangeFilter() {
+    var btn = document.getElementById("rangeBtn");
+    var menu = document.getElementById("rangeMenu");
+    if (!btn) return;
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      menu.hidden = !menu.hidden;
     });
-    html += '    </div>';
-    html += '  </div>';
-    html += '</div>';
-
-    html += '</div>';
-    els.panels.overview.innerHTML = html;
-
-    els.panels.overview.querySelectorAll("[data-goto]").forEach(function (b) {
-      b.addEventListener("click", function () { switchTab(b.getAttribute("data-goto")); });
+    menu.querySelectorAll("[data-range]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        currentRange = b.getAttribute("data-range");
+        menu.hidden = true;
+        renderHeader();
+        renderStats();
+      });
     });
+    document.addEventListener("click", function () { if (menu) menu.hidden = true; });
   }
 
-  function heatmapHTML() {
-    var hoursHeader = '<div class="heatmap__hours"><span></span>';
-    for (var h = 0; h < 24; h++) hoursHeader += "<span>" + (h % 6 === 0 ? h : "") + "</span>";
-    hoursHeader += "</div>";
-
-    var best = D.bestWindows(6);
-    function isBest(d, h) { return best.some(function (w) { return w.day === d && w.hour === h; }); }
-
-    var rows = "";
-    for (var d = 0; d < 7; d++) {
-      rows += '<div class="heatmap__row"><span class="heatmap__day">' + D.DAYS[d] + "</span>";
-      for (var hr = 0; hr < 24; hr++) {
-        var v = D.engagement[d][hr];
-        rows += '<div class="heat" data-best="' + (isBest(d, hr) ? 1 : 0) + '" style="background:' + heatColor(v) + '" title="' + D.DAYS[d] + " " + D.fmtHour(hr) + ' · ' + v + '/100"></div>';
-      }
-      rows += "</div>";
-    }
-
-    var legend =
-      '<div class="heatmap__legend">Less' +
-      '<span class="heatmap__scale">' +
-      [10,30,50,70,90].map(function (v) { return '<span style="background:' + heatColor(v) + '"></span>'; }).join("") +
-      '</span>More · <span style="color:var(--pb-200)">outlined = top window</span></div>';
-
-    return '<div class="heatmap">' + hoursHeader + rows + "</div>" + legend;
-  }
-  function heatColor(v) {
-    // interpolate from dark surface to powder blue by activity
-    var t = Math.max(0, Math.min(1, v / 100));
-    // base #1B262C -> pb-400 #22CCEE
-    var a = [27, 38, 44], b = [34, 204, 238];
-    var r = Math.round(a[0] + (b[0] - a[0]) * t);
-    var g = Math.round(a[1] + (b[1] - a[1]) * t);
-    var bl = Math.round(a[2] + (b[2] - a[2]) * t);
-    return "rgb(" + r + "," + g + "," + bl + ")";
-  }
-  function peakLabel() {
+  /* ---------------- TIPS (what's new) ---------------- */
+  function renderTips() {
     var w = D.bestWindows(1)[0];
-    return D.DAYS[w.day] + " " + D.fmtHour(w.hour);
+    var peak = D.DAYS[w.day] + " " + D.fmtHour(w.hour);
+    var tips = [
+      { icon: "✦", title: "Copilot works on every page", desc: "Tap the Copilot button anywhere to schedule a post or mass DM in seconds." },
+      { icon: "🕒", title: "Your fans peak at " + peak, desc: "Schedule your next drop then for the biggest reach." },
+      { icon: "🔁", title: A.activeCount() + " automations running", desc: "New subscribers and win-backs are handled for you on autopilot." }
+    ];
+    els.tips.innerHTML = tips.map(function (t) {
+      return '<div class="action-tip"><div class="action-tip__icon">' + t.icon + '</div>' +
+             '<div class="action-tip__body"><div class="action-tip__title">' + t.title + '</div>' +
+             '<div class="action-tip__desc">' + t.desc + '</div></div></div>';
+    }).join("");
   }
 
-  /* ---------------- TABS ---------------- */
-  function switchTab(tab) {
-    currentTab = tab;
-    document.querySelectorAll(".tab").forEach(function (t) {
-      t.classList.toggle("is-active", t.getAttribute("data-tab") === tab);
+  /* ---------------- VIEW SWITCHING ---------------- */
+  function switchView(view) {
+    if (view === "overview") view = "home";
+    currentView = view;
+
+    // nav highlight
+    document.querySelectorAll(".navitem, .iconbtn[data-view]").forEach(function (n) {
+      n.classList.toggle("is-active", n.getAttribute("data-view") === view);
     });
-    document.querySelectorAll(".tabpanel").forEach(function (p) {
-      p.classList.toggle("is-active", p.getAttribute("data-panel") === tab);
+
+    // views
+    document.querySelectorAll(".view").forEach(function (v) {
+      v.classList.toggle("is-active", v.getAttribute("data-view") === view);
     });
+
+    els.stats.style.display = view === "home" ? "" : "none";
+
+    placeCopilot(view);
+    renderHeader();
+    if (view === "home") renderStats();
     renderCurrentPanel();
+    closeSidebar();
   }
+
   function renderCurrentPanel() {
-    if (currentTab === "overview") renderOverview();
-    else if (currentTab === "scheduler") S.renderPanel(els.panels.scheduler);
-    else if (currentTab === "automations") A.renderPanel(els.panels.automations);
+    if (currentView === "scheduler") S.renderPanel(els.views.scheduler);
+    else if (currentView === "automations") A.renderPanel(els.views.automations);
   }
 
   function refresh() {
-    renderStats();
+    if (currentView === "home") { renderStats(); renderTips(); }
     renderCurrentPanel();
   }
 
-  /* ---------------- MODAL ---------------- */
+  /* ---------------- COPILOT: dock vs float ---------------- */
+  function placeCopilot(view) {
+    if (view === "home") {
+      els.homeSlot.appendChild(els.copilot);
+      els.floatDock.classList.add("is-hidden");
+      els.fab.hidden = true;
+    } else {
+      els.floatDock.appendChild(els.copilot);
+      // start collapsed: only the FAB shows until the creator opens it
+      els.floatDock.classList.add("is-hidden");
+      els.fab.hidden = false;
+    }
+  }
+  function openFloatingCopilot() {
+    els.floatDock.classList.remove("is-hidden");
+    els.fab.hidden = true;
+    var input = document.getElementById("chatInput");
+    if (input) input.focus();
+  }
+  function minimizeCopilot() {
+    if (currentView === "home") return; // hero can't be minimized
+    els.floatDock.classList.add("is-hidden");
+    els.fab.hidden = false;
+  }
+
+  /* ---------------- THEME ---------------- */
+  function initTheme() {
+    els.themeToggle.addEventListener("click", function () {
+      var cur = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+      var next = cur === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      try { localStorage.setItem("passes-theme", next); } catch (e) {}
+      toast(next === "dark" ? "Dark mode on" : "Light mode on");
+    });
+  }
+
+  /* ---------------- SIDEBAR (mobile) ---------------- */
+  function openSidebar() { els.sidebar.classList.add("is-open"); els.scrim.hidden = false; }
+  function closeSidebar() { els.sidebar.classList.remove("is-open"); els.scrim.hidden = true; }
+
+  /* ---------------- MODAL / TOASTS ---------------- */
   function openModal(html) {
     els.modalCard.innerHTML = html;
     els.modal.hidden = false;
@@ -169,7 +175,6 @@
   }
   function escClose(e) { if (e.key === "Escape") closeModal(); }
 
-  /* ---------------- TOASTS ---------------- */
   function toast(msg) {
     var t = document.createElement("div");
     t.className = "toast";
@@ -178,55 +183,26 @@
     var frames = 0;
     (function tick() {
       frames++;
-      if (frames < 180) return requestAnimationFrame(tick);
+      if (frames < 170) return requestAnimationFrame(tick);
       t.style.transition = "opacity .3s"; t.style.opacity = "0";
       var f2 = 0;
       (function fade() { if (f2++ < 20) return requestAnimationFrame(fade); t.remove(); })();
     })();
   }
 
-  /* ---------------- COPILOT open/close ---------------- */
-  function setupCopilot() {
-    var copilot = document.getElementById("copilot");
-    var fab = document.getElementById("openChat");
-    var closeBtn = document.getElementById("closeChat");
-    var openMobile = document.getElementById("openChatMobile");
+  /* ================= SchedulerUI (modal w/ media upload) ============ */
+  var mediaState = [];
 
-    function isMobile() { return window.matchMedia("(max-width: 900px)").matches; }
-
-    closeBtn.addEventListener("click", function () {
-      if (isMobile()) { copilot.classList.remove("is-open"); }
-      else { copilot.classList.add("is-collapsed"); fab.hidden = false; }
-    });
-    fab.addEventListener("click", function () {
-      copilot.classList.remove("is-collapsed"); fab.hidden = true;
-    });
-    openMobile.addEventListener("click", function () {
-      copilot.classList.add("is-open");
-    });
-  }
-
-  /* ---------------- helpers ---------------- */
-  function trim(s, n) { s = String(s); return s.length > n ? s.slice(0, n - 1) + "…" : s; }
-  function whenShort(d) {
-    var dayName = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
-    var today = new Date(); today.setHours(0,0,0,0);
-    var that = new Date(d); that.setHours(0,0,0,0);
-    var diff = Math.round((that - today) / 86400000);
-    var rel = diff === 0 ? "Today" : diff === 1 ? "Tomorrow" : dayName;
-    return rel + ", " + D.fmtHourMin(d);
-  }
-
-  /* ================= SchedulerUI (modal) ================= */
   window.SchedulerUI = {
     openScheduleModal: function (editId) {
       var item = editId ? D.queue.filter(function (q) { return q.id === editId; })[0] : null;
       var isEdit = !!item;
       var kind = item ? item.kind : "post";
-      var when = item ? toLocalInput(item.when) : toLocalInput(S.suggestTime({}));
+      var whenVal = item ? toLocalInput(item.when) : toLocalInput(S.suggestTime({}));
       var audience = item ? item.audience : "all";
       var price = item ? item.price : 0;
       var text = item ? item.text : "";
+      mediaState = item && item.media ? item.media.slice() : [];
 
       var segOpts = D.segments.map(function (s) {
         return '<option value="' + s.id + '"' + (s.id === audience ? " selected" : "") + '>' + s.name + " (" + s.size.toLocaleString() + ")</option>";
@@ -234,24 +210,32 @@
 
       var html =
         '<h2 class="modal__title">' + (isEdit ? "Edit scheduled content" : "Schedule content") + '</h2>' +
-        '<p class="modal__sub">The copilot can do this in one sentence, but here are the controls.</p>' +
+        '<p class="modal__sub">Add media, pick a time, and let the copilot handle timing, price, and caption.</p>' +
         '<div class="field"><label>Type</label><select id="m_kind">' +
         '<option value="post"' + (kind === "post" ? " selected" : "") + '>Feed post</option>' +
         '<option value="dm"' + (kind === "dm" ? " selected" : "") + '>Mass DM</option></select></div>' +
+        '<div class="field"><label>Media</label>' +
+        '  <div class="dropzone" id="m_drop"><div class="dropzone__ico">🖼️</div>' +
+        '  <div>Drag photos or videos here, or <strong>browse</strong></div>' +
+        '  <div class="dropzone__hint">Images and video up to your plan limit. Stored in your Vault.</div></div>' +
+        '  <input type="file" id="m_file" accept="image/*,video/*" multiple hidden />' +
+        '  <div class="media-grid" id="m_media"></div>' +
+        '</div>' +
         '<div class="field"><label>Audience</label><select id="m_aud">' + segOpts + '</select></div>' +
-        '<div class="field"><label>When</label><input id="m_when" type="datetime-local" value="' + when + '"/>' +
+        '<div class="field"><label>When</label><input id="m_when" type="datetime-local" value="' + whenVal + '"/>' +
         '<div class="small muted" id="m_quality" style="margin-top:6px"></div></div>' +
         '<div class="field"><label>Unlock price (0 = free)</label><input id="m_price" type="number" min="0" value="' + price + '"/></div>' +
         '<div class="field"><label>Caption / message</label><textarea id="m_text" placeholder="Write something, or let the copilot draft it">' + S.esc(text) + '</textarea>' +
-        '<button class="btn btn--ghost btn--sm" id="m_gen" style="margin-top:8px">✦ Generate caption</button>' +
-        '<button class="btn btn--ghost btn--sm" id="m_best" style="margin-top:8px">✦ Best time</button>' +
-        '<button class="btn btn--ghost btn--sm" id="m_price_smart" style="margin-top:8px">✦ Smart price</button></div>' +
+        '<button class="btn btn--ghost btn--sm" id="m_gen">✦ Generate caption</button> ' +
+        '<button class="btn btn--ghost btn--sm" id="m_best">✦ Best time</button> ' +
+        '<button class="btn btn--ghost btn--sm" id="m_price_smart">✦ Smart price</button></div>' +
         '<div class="modal__foot">' +
         '<button class="btn btn--ghost" data-close-modal>Cancel</button>' +
         '<button class="btn btn--primary" id="m_save">' + (isEdit ? "Save changes" : "Add to queue") + '</button></div>';
 
       openModal(html);
       wireModalClose();
+      wireMediaUpload();
 
       var whenEl = document.getElementById("m_when");
       var qEl = document.getElementById("m_quality");
@@ -267,19 +251,16 @@
       var genN = 0;
       document.getElementById("m_gen").addEventListener("click", function (e) {
         e.preventDefault();
-        var k = document.getElementById("m_kind").value;
-        document.getElementById("m_text").value = S.generateCaption({ kind: k, topic: null, nonce: ++genN });
+        document.getElementById("m_text").value = S.generateCaption({ kind: document.getElementById("m_kind").value, nonce: ++genN });
       });
       document.getElementById("m_best").addEventListener("click", function (e) {
-        e.preventDefault();
-        whenEl.value = toLocalInput(S.suggestTime({}));
-        updateQuality();
+        e.preventDefault(); whenEl.value = toLocalInput(S.suggestTime({})); updateQuality();
       });
       document.getElementById("m_price_smart").addEventListener("click", function (e) {
         e.preventDefault();
-        var k = document.getElementById("m_kind").value;
-        var a = document.getElementById("m_aud").value;
-        document.getElementById("m_price").value = S.suggestPrice({ kind: k, audience: a }).mid;
+        document.getElementById("m_price").value = S.suggestPrice({
+          kind: document.getElementById("m_kind").value, audience: document.getElementById("m_aud").value
+        }).mid;
       });
 
       document.getElementById("m_save").addEventListener("click", function () {
@@ -289,33 +270,71 @@
           when: fromLocalInput(document.getElementById("m_when").value) || S.suggestTime({}),
           price: parseInt(document.getElementById("m_price").value, 10) || 0,
           text: document.getElementById("m_text").value.trim() || S.generateCaption({ kind: "post" }),
+          media: mediaState.slice(),
           status: "scheduled"
         };
-        if (isEdit) {
-          S.updateItem(editId, payload);
-          toast("Changes saved");
-        } else {
+        if (isEdit) { S.updateItem(editId, payload); toast("Changes saved"); }
+        else {
           payload.source = "manual";
           payload.smart = { time: false, caption: false, price: false };
           S.addToQueue(payload);
           toast("Added to your queue");
         }
         closeModal();
-        refresh();
+        switchView("scheduler");
       });
     }
   };
 
+  function wireMediaUpload() {
+    var drop = document.getElementById("m_drop");
+    var file = document.getElementById("m_file");
+    if (!drop) return;
+    drop.addEventListener("click", function () { file.click(); });
+    file.addEventListener("change", function () { addFiles(file.files); file.value = ""; });
+    ["dragenter", "dragover"].forEach(function (ev) {
+      drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("is-drag"); });
+    });
+    ["dragleave", "drop"].forEach(function (ev) {
+      drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("is-drag"); });
+    });
+    drop.addEventListener("drop", function (e) {
+      if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files);
+    });
+    renderMedia();
+  }
+  function addFiles(fileList) {
+    Array.prototype.forEach.call(fileList, function (f) {
+      var kind = /^image\//.test(f.type) ? "image" : /^video\//.test(f.type) ? "video" : "file";
+      var url = "";
+      try { url = (kind === "image" || kind === "video") ? URL.createObjectURL(f) : ""; } catch (e) {}
+      mediaState.push({ name: f.name, kind: kind, url: url });
+    });
+    renderMedia();
+  }
+  function renderMedia() {
+    var wrap = document.getElementById("m_media");
+    if (!wrap) return;
+    wrap.innerHTML = mediaState.map(function (m, i) {
+      var inner = m.kind === "image" && m.url ? '<img src="' + m.url + '" alt="" />'
+        : m.kind === "video" && m.url ? '<video src="' + m.url + '" muted></video>'
+        : (m.kind === "video" ? "🎬" : "📄");
+      return '<div class="media-thumb" data-i="' + i + '">' + inner +
+        '<button class="media-thumb__rm" data-rm="' + i + '" title="Remove">×</button>' +
+        '<span class="media-thumb__name">' + S.esc(m.name) + '</span></div>';
+    }).join("");
+    wrap.querySelectorAll("[data-rm]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        mediaState.splice(parseInt(b.getAttribute("data-rm"), 10), 1);
+        renderMedia();
+      });
+    });
+  }
+
   /* ================= AutomationsUI (modal) ================= */
   window.AutomationsUI = {
-    openDetail: function (id) {
-      var a = A.findFlow(id);
-      if (!a) return;
-      renderFlowModal(a, false);
-    },
-    openDraftPreview: function (draft) {
-      renderFlowModal(draft, true);
-    },
+    openDetail: function (id) { var a = A.findFlow(id); if (a) renderFlowModal(a, false); },
+    openDraftPreview: function (draft) { renderFlowModal(draft, true); },
     openBuilder: function () {
       var groups = {};
       D.triggers.forEach(function (t) { (groups[t.group] = groups[t.group] || []).push(t); });
@@ -327,7 +346,7 @@
       });
       var html =
         '<h2 class="modal__title">New automation</h2>' +
-        '<p class="modal__sub">Pick a trigger and the copilot drafts a starter flow you can refine. Or just tell the copilot in plain words.</p>' +
+        '<p class="modal__sub">Pick a trigger and the copilot drafts a starter flow you can refine.</p>' +
         '<div class="field"><label>Trigger (' + D.triggers.length + ' available)</label><select id="b_trig">' + opts + '</select>' +
         '<div class="small muted" id="b_desc" style="margin-top:6px"></div></div>' +
         '<div class="field"><label>Name</label><input id="b_name" type="text" placeholder="e.g. Welcome new subscribers"/></div>' +
@@ -335,23 +354,14 @@
         '<button class="btn btn--primary" id="b_create">Create flow</button></div>';
       openModal(html);
       wireModalClose();
-
       var trigEl = document.getElementById("b_trig");
       var descEl = document.getElementById("b_desc");
       var nameEl = document.getElementById("b_name");
-      function upd() {
-        var t = D.triggerById(trigEl.value);
-        descEl.textContent = t ? t.desc : "";
-        if (!nameEl.value) nameEl.placeholder = "e.g. " + (t ? t.name + " flow" : "");
-      }
+      function upd() { var t = D.triggerById(trigEl.value); descEl.textContent = t ? t.desc : ""; }
       trigEl.addEventListener("change", upd); upd();
-
       document.getElementById("b_create").addEventListener("click", function () {
         var flow = A.createFlow({ trigger: trigEl.value, name: nameEl.value.trim() || null });
-        closeModal();
-        switchTab("automations");
-        refresh();
-        toast("Flow created");
+        closeModal(); switchView("automations"); toast("Flow created");
         window.AutomationsUI.openDetail(flow.id);
       });
     }
@@ -363,22 +373,18 @@
       ? '<span class="pill pill--active">● Live</span>'
       : '<span class="pill pill--paused">● Paused</span>';
     var head =
-      '<div class="row" style="justify-content:space-between;align-items:flex-start">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">' +
       '<div><h2 class="modal__title">' + S.esc(a.name) + '</h2>' +
       '<p class="modal__sub">Trigger: ' + trig.icon + " " + trig.name + " · " + a.steps.length + " steps</p></div>" +
       (isDraft ? "" : statusPill) + '</div>';
-
     var foot = isDraft
       ? '<div class="modal__foot"><button class="btn btn--ghost" data-close-modal>Close</button></div>'
-      : '<div class="modal__foot">' +
-        '<button class="btn btn--danger" id="f_del">Delete</button>' +
+      : '<div class="modal__foot"><button class="btn btn--danger" id="f_del">Delete</button>' +
         '<span class="spacer"></span>' +
         '<button class="btn btn--ghost" id="f_toggle">' + (a.status === "active" ? "Pause" : "Activate") + '</button>' +
         '<button class="btn btn--primary" data-close-modal>Done</button></div>';
-
     openModal(head + '<div style="margin:6px 0 14px">' + A.flowHTML(a) + "</div>" + foot);
     wireModalClose();
-
     if (!isDraft) {
       document.getElementById("f_toggle").addEventListener("click", function () {
         A.toggleFlow(a.id); closeModal(); refresh(); toast(a.status === "active" ? "Automation live" : "Automation paused");
@@ -390,49 +396,77 @@
   }
 
   function wireModalClose() {
-    document.querySelectorAll("[data-close-modal]").forEach(function (b) {
-      b.addEventListener("click", closeModal);
-    });
+    document.querySelectorAll("[data-close-modal]").forEach(function (b) { b.addEventListener("click", closeModal); });
   }
 
-  /* --------- datetime-local helpers --------- */
+  /* ---------------- datetime helpers ---------------- */
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
   function toLocalInput(d) {
-    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) +
-           "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
   }
   function fromLocalInput(v) {
     if (!v) return null;
     var m = v.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
-    if (!m) return null;
-    return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], 0, 0);
+    return m ? new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], 0, 0) : null;
   }
 
   /* ---------------- BOOT ---------------- */
   function boot() {
+    els.sidebar = document.getElementById("sidebar");
+    els.scrim = document.getElementById("sidebarScrim");
+    els.head = document.getElementById("mainHead");
     els.stats = document.getElementById("statsRow");
-    els.panels = {
-      overview: document.getElementById("panel-overview"),
-      scheduler: document.getElementById("panel-scheduler"),
-      automations: document.getElementById("panel-automations")
+    els.tips = document.getElementById("tipsList");
+    els.views = {
+      scheduler: document.getElementById("view-scheduler"),
+      automations: document.getElementById("view-automations")
     };
+    els.homeSlot = document.getElementById("homeCopilotSlot");
+    els.floatDock = document.getElementById("floatDock");
+    els.copilot = document.getElementById("copilot");
+    els.fab = document.getElementById("copilotFab");
+    els.themeToggle = document.getElementById("themeToggle");
     els.modal = document.getElementById("modal");
     els.modalCard = document.getElementById("modalCard");
     els.toasts = document.getElementById("toasts");
 
     els.modal.querySelector(".modal__backdrop").addEventListener("click", closeModal);
 
-    document.querySelectorAll(".tab").forEach(function (t) {
-      t.addEventListener("click", function () { switchTab(t.getAttribute("data-tab")); });
+    // nav (view switchers + "coming soon" tools) — scoped to the sidebar so
+    // clicks inside a <section class="view" data-view="..."> don't bubble up here.
+    els.sidebar.querySelectorAll("[data-view]").forEach(function (n) {
+      n.addEventListener("click", function () { switchView(n.getAttribute("data-view")); });
+    });
+    els.sidebar.querySelectorAll("[data-soon]").forEach(function (n) {
+      n.addEventListener("click", function () { toast(n.getAttribute("data-soon") + " is not part of this prototype"); });
     });
 
-    renderStats();
-    renderOverview();
-    setupCopilot();
+    // copilot float controls
+    els.fab.addEventListener("click", openFloatingCopilot);
+    document.getElementById("copilotMin").addEventListener("click", minimizeCopilot);
+
+    // mobile menu
+    document.getElementById("menuBtn").addEventListener("click", openSidebar);
+    els.scrim.addEventListener("click", closeSidebar);
+
+    initTheme();
+    renderTips();
+    switchView("home");     // places copilot in the hero slot + renders header/stats
     window.Chatbot.init();
   }
 
-  window.App = { refresh: refresh, switchTab: switchTab, toast: toast, openModal: openModal, closeModal: closeModal };
+  // keep the copilot visible after an action (float open when off-home)
+  function showCopilot() { if (currentView !== "home") openFloatingCopilot(); }
+
+  window.App = {
+    refresh: refresh,
+    switchView: switchView,
+    switchTab: switchView, // alias for chatbot
+    showCopilot: showCopilot,
+    toast: toast,
+    openModal: openModal,
+    closeModal: closeModal
+  };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
