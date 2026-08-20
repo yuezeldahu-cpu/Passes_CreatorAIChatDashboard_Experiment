@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>passes · creator copilot</title>
-  <meta name="description" content="Passes creator dashboard with a floating AI copilot that schedules content smartly and builds automated messages." />
+  <meta name="description" content="Passes creator dashboard with an AI copilot that schedules content smartly and builds automated messages." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -24,7 +24,7 @@
     })();
   </script>
 
-  <!-- ========== LEFT SIDEBAR ========== -->
+  <!-- ========== LEFT SIDEBAR (foldable) ========== -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar__inner">
       <div class="sidebar__top">
@@ -40,7 +40,7 @@
       </div>
 
       <div class="iconrow">
-        <button class="iconbtn is-active" data-view="home" title="Home" aria-label="Home">
+        <button class="iconbtn is-active" data-view="overview" title="Home" aria-label="Home">
           <svg viewBox="0 0 24 24" class="ic"><path d="M4 11l8-6 8 6M6 10v9h12v-9"/></svg>
         </button>
         <button class="iconbtn" data-soon="Messages" title="Messages" aria-label="Messages">
@@ -126,16 +126,22 @@
   <!-- ========== MAIN ========== -->
   <main class="main" id="main">
     <div class="wrap">
-      <header class="mainhead" id="mainHead"></header>
+      <header class="mainhead">
+        <div><h1 class="mainhead__title">Welcome back, Ava!</h1></div>
+        <div id="rangeHost"></div>
+      </header>
 
       <section class="stats" id="statsRow" aria-label="Key metrics"></section>
 
-      <!-- HOME VIEW -->
-      <section class="view is-active" data-view="home" id="view-home">
-        <div class="home">
-          <!-- centered copilot slot -->
-          <div class="copilot-slot" id="homeCopilotSlot"></div>
-          <!-- what's new / notifications -->
+      <nav class="tabs" role="tablist" aria-label="Dashboard sections">
+        <button class="tab is-active" role="tab" data-view="overview">Overview</button>
+        <button class="tab" role="tab" data-view="scheduler">Smart Scheduler</button>
+        <button class="tab" role="tab" data-view="automations">Automated Messages</button>
+      </nav>
+
+      <!-- OVERVIEW -->
+      <section class="view is-active" data-view="overview" id="view-overview">
+        <div class="overview">
           <div class="whatsnew">
             <div class="banner" role="img" aria-label="New livestream experience">
               <div class="banner__glass"></div>
@@ -153,19 +159,20 @@
               <div id="tipsList" class="actionlist"></div>
             </div>
           </div>
+          <div class="card" id="upNextCard"></div>
         </div>
       </section>
 
-      <!-- SCHEDULER VIEW -->
+      <!-- SMART SCHEDULER -->
       <section class="view" data-view="scheduler" id="view-scheduler"></section>
 
-      <!-- AUTOMATIONS VIEW -->
+      <!-- AUTOMATED MESSAGES -->
       <section class="view" data-view="automations" id="view-automations"></section>
     </div>
   </main>
 
-  <!-- ========== COPILOT (reparented between home slot & floating dock) ========== -->
-  <div class="copilot" id="copilot">
+  <!-- ========== COPILOT (docked right) ========== -->
+  <aside class="copilot" id="copilot" aria-label="AI copilot">
     <div class="copilot__head">
       <div class="copilot__id">
         <span class="copilot__dot" aria-hidden="true"></span>
@@ -174,7 +181,7 @@
           <div class="copilot__status">Schedule posts &amp; DMs, on autopilot</div>
         </div>
       </div>
-      <button class="iconbtn copilot__min" id="copilotMin" aria-label="Minimize copilot" title="Minimize">–</button>
+      <button class="iconbtn copilot__min" id="copilotMin" aria-label="Collapse copilot" title="Collapse">×</button>
     </div>
     <div class="chat" id="chatLog" aria-live="polite"></div>
     <div class="chat__suggest" id="chatSuggest"></div>
@@ -183,10 +190,8 @@
              placeholder="Try: schedule a post tomorrow at the best time" aria-label="Message your copilot" />
       <button class="composer__send" type="submit" aria-label="Send">↑</button>
     </form>
-  </div>
+  </aside>
 
-  <!-- floating dock (holds copilot on non-home pages) -->
-  <div class="floatdock" id="floatDock"></div>
   <button class="fab" id="copilotFab" hidden aria-label="Open copilot">
     <span class="fab__spark" aria-hidden="true">✦</span>
     <span class="fab__label">Copilot</span>

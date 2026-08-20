@@ -5,23 +5,26 @@ creators schedule content smartly and build automated message flows from plain-l
 requests. It brings the power of the **Smart Scheduler** and **Automated Messages** tools
 into a single conversational copilot.
 
-The **Copilot is a floating bot available on every page**: it sits centered on the home
-dashboard and, on any other page, collapses to a launcher button you can pop open to
-schedule a post or mass DM in seconds.
+The **Copilot is docked on the right** and is available across every tab, so a creator can
+schedule a post or mass DM from anywhere. It collapses to a launcher button when not needed.
 
 > Prototype only. Self-contained, no build step, no backend, no API keys. All data is
 > illustrative sample data (no real creators).
 
 ## Layout
 
-- **Left sidebar** matching the product: Creator Tools (Vault, Lists, Scheduler, Start
-  Livestream, Post Categories, Manage Memberships, Integrations) and Smart Tools
+- **Foldable left sidebar** matching the product: Creator Tools (Vault, Lists, Scheduler,
+  Start Livestream, Post Categories, Manage Memberships, Integrations) and Smart Tools
   (Smart Scheduler, Automated Messages), with the account switcher and Create button.
-- **Home** shows a "Welcome back" header with a working **time-range filter**
-  (Today / This Week / This Month / All Time), four product metrics
-  (New Profile Visits, New Memberships, 1:1 DM Revenue, Membership Revenue), the
-  centered **Copilot**, and a **What's new** area featuring the livestream banner and tips.
-- **Light and dark themes** with a toggle (defaults to light to match the product).
+  Folded to an icon rail by default; the chevron expands it (state remembered).
+- A "Welcome back" header with a working **time-range filter**
+  (Today / This Week / This Month / All Time) and four product metrics
+  (New Profile Visits, New Memberships, 1:1 DM Revenue, Membership Revenue).
+- **Tabs**: Overview, Smart Scheduler, Automated Messages. Overview shows a **What's new**
+  area with the livestream banner and tips, plus an "Up next" card.
+- **Right-docked Copilot**, collapsible to a launcher button.
+- **Light and dark themes** with a toggle, using the Passes design-system color tokens
+  (defaults to light to match the product).
 
 ## Try it
 

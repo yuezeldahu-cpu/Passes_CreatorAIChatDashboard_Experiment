@@ -1,7 +1,7 @@
 /* ============================================================
-   app.js — shell: sidebar nav, views, stats + range filter,
-   theme toggle, copilot reparenting (centered <-> floating),
-   modals (schedule w/ media upload, automations), toasts, boot.
+   app.js — shell: foldable sidebar nav, tabbed views,
+   stats + range filter, right-docked copilot (collapse + FAB),
+   theme toggle, modals (schedule w/ media upload), toasts, boot.
    Exposes: window.App, window.SchedulerUI, window.AutomationsUI
    ============================================================ */
 (function () {
@@ -10,12 +10,12 @@
   var S = window.Scheduler;
   var A = window.Automations;
 
-  var currentView = "home";
+  var currentView = "overview";
   var currentRange = "week"; // matches the reference screenshot
   var CREATOR = "Ava";
   var els = {};
 
-  /* ---------------- STATS + HEADER ---------------- */
+  /* ---------------- STATS + RANGE FILTER ---------------- */
   function renderStats() {
     var rows = D.rangeStats[currentRange] || D.rangeStats.week;
     els.stats.innerHTML = D.STAT_LABELS.map(function (label, i) {
@@ -28,56 +28,38 @@
     }).join("");
   }
 
-  function renderHeader() {
-    if (currentView === "home") {
-      els.head.innerHTML =
-        '<div><h1 class="mainhead__title">Welcome back, ' + CREATOR + '!</h1></div>' +
-        rangeFilterHTML();
-      wireRangeFilter();
-    } else if (currentView === "scheduler") {
-      els.head.innerHTML = '<div><h1 class="mainhead__title">Smart Scheduler</h1>' +
-        '<p class="mainhead__sub">Plan posts and mass DMs at the smartest times.</p></div>';
-    } else {
-      els.head.innerHTML = '<div><h1 class="mainhead__title">Automated Messages</h1>' +
-        '<p class="mainhead__sub">Flows that message fans on autopilot.</p></div>';
-    }
-  }
-
-  function rangeFilterHTML() {
+  function renderRangeFilter() {
     var cur = D.RANGES.filter(function (r) { return r.id === currentRange; })[0];
     var menu = D.RANGES.map(function (r) {
       return '<button data-range="' + r.id + '" class="' + (r.id === currentRange ? "is-active" : "") + '">' + r.label + '</button>';
     }).join("");
-    return '<div class="rangefilter" id="rangeFilter">' +
+    els.rangeHost.innerHTML =
+      '<div class="rangefilter">' +
       '<button class="rangefilter__btn" id="rangeBtn">' + cur.label +
       ' <svg viewBox="0 0 24 24" class="ic ic-sm"><path d="M6 9l6 6 6-6"/></svg></button>' +
-      '<div class="rangefilter__menu" id="rangeMenu" hidden>' + menu + '</div></div>';
-  }
-  function wireRangeFilter() {
+      '<div class="rangefilter__menu" id="rangeMenu" hidden></div></div>';
+    document.getElementById("rangeMenu").innerHTML = menu;
+
     var btn = document.getElementById("rangeBtn");
-    var menu = document.getElementById("rangeMenu");
-    if (!btn) return;
-    btn.addEventListener("click", function (e) {
-      e.stopPropagation();
-      menu.hidden = !menu.hidden;
-    });
-    menu.querySelectorAll("[data-range]").forEach(function (b) {
+    var menuEl = document.getElementById("rangeMenu");
+    btn.addEventListener("click", function (e) { e.stopPropagation(); menuEl.hidden = !menuEl.hidden; });
+    menuEl.querySelectorAll("[data-range]").forEach(function (b) {
       b.addEventListener("click", function () {
         currentRange = b.getAttribute("data-range");
-        menu.hidden = true;
-        renderHeader();
+        menuEl.hidden = true;
+        renderRangeFilter();
         renderStats();
       });
     });
-    document.addEventListener("click", function () { if (menu) menu.hidden = true; });
+    document.addEventListener("click", function () { if (menuEl) menuEl.hidden = true; });
   }
 
-  /* ---------------- TIPS (what's new) ---------------- */
+  /* ---------------- OVERVIEW (tips + up next) ---------------- */
   function renderTips() {
     var w = D.bestWindows(1)[0];
     var peak = D.DAYS[w.day] + " " + D.fmtHour(w.hour);
     var tips = [
-      { icon: "✦", title: "Copilot works on every page", desc: "Tap the Copilot button anywhere to schedule a post or mass DM in seconds." },
+      { icon: "✦", title: "Ask your copilot anything", desc: "It schedules posts and mass DMs, prices them, and builds automations from a sentence." },
       { icon: "🕒", title: "Your fans peak at " + peak, desc: "Schedule your next drop then for the biggest reach." },
       { icon: "🔁", title: A.activeCount() + " automations running", desc: "New subscribers and win-backs are handled for you on autopilot." }
     ];
@@ -88,62 +70,64 @@
     }).join("");
   }
 
-  /* ---------------- VIEW SWITCHING ---------------- */
+  function renderUpNext() {
+    var next = D.queue.filter(function (q) { return q.status === "scheduled"; })
+      .sort(function (a, b) { return a.when - b.when; })[0];
+    var html = '<div class="card__head"><div><h3 class="card__title">Up next</h3></div>' +
+      '<button class="btn btn--ghost btn--sm" data-goto-scheduler>View queue</button></div>';
+    if (next) {
+      var q = S.timeQuality(next.when);
+      html += '<div class="action-tip">' +
+        '<div class="action-tip__icon">' + (next.kind === "dm" ? "💌" : "🖼️") + '</div>' +
+        '<div class="action-tip__body">' +
+        '<div class="action-tip__title">' + (next.kind === "dm" ? "Mass DM" : "Post") + " · " + whenShort(next.when) + '</div>' +
+        '<div class="action-tip__desc">' + S.esc(trim(next.text, 90)) + '</div>' +
+        '<div class="small" style="margin-top:6px"><span class="stat__delta ' + q.cls + '">' + q.label + '</span></div>' +
+        '</div></div>';
+    } else {
+      html += '<div class="empty">Nothing queued yet. Ask the copilot to schedule something.</div>';
+    }
+    els.upNext.innerHTML = html;
+    var b = els.upNext.querySelector("[data-goto-scheduler]");
+    if (b) b.addEventListener("click", function () { switchView("scheduler"); });
+  }
+
+  function renderOverview() { renderTips(); renderUpNext(); }
+
+  /* ---------------- VIEW SWITCHING (tabs + nav) ---------------- */
   function switchView(view) {
-    if (view === "overview") view = "home";
+    if (view === "home") view = "overview";
     currentView = view;
 
-    // nav highlight
-    document.querySelectorAll(".navitem, .iconbtn[data-view]").forEach(function (n) {
+    document.querySelectorAll(".tab").forEach(function (t) {
+      t.classList.toggle("is-active", t.getAttribute("data-view") === view);
+    });
+    els.sidebar.querySelectorAll("[data-view]").forEach(function (n) {
       n.classList.toggle("is-active", n.getAttribute("data-view") === view);
     });
-
-    // views
     document.querySelectorAll(".view").forEach(function (v) {
       v.classList.toggle("is-active", v.getAttribute("data-view") === view);
     });
 
-    els.stats.style.display = view === "home" ? "" : "none";
-
-    placeCopilot(view);
-    renderHeader();
-    if (view === "home") renderStats();
     renderCurrentPanel();
     closeSidebar();
   }
-
   function renderCurrentPanel() {
-    if (currentView === "scheduler") S.renderPanel(els.views.scheduler);
+    if (currentView === "overview") renderOverview();
+    else if (currentView === "scheduler") S.renderPanel(els.views.scheduler);
     else if (currentView === "automations") A.renderPanel(els.views.automations);
   }
+  function refresh() { renderStats(); renderCurrentPanel(); }
 
-  function refresh() {
-    if (currentView === "home") { renderStats(); renderTips(); }
-    renderCurrentPanel();
-  }
-
-  /* ---------------- COPILOT: dock vs float ---------------- */
-  function placeCopilot(view) {
-    if (view === "home") {
-      els.homeSlot.appendChild(els.copilot);
-      els.floatDock.classList.add("is-hidden");
-      els.fab.hidden = true;
-    } else {
-      els.floatDock.appendChild(els.copilot);
-      // start collapsed: only the FAB shows until the creator opens it
-      els.floatDock.classList.add("is-hidden");
-      els.fab.hidden = false;
-    }
-  }
-  function openFloatingCopilot() {
-    els.floatDock.classList.remove("is-hidden");
+  /* ---------------- COPILOT (docked / collapse) ---------------- */
+  function openCopilot() {
+    document.documentElement.classList.remove("copilot-off");
     els.fab.hidden = true;
     var input = document.getElementById("chatInput");
-    if (input) input.focus();
+    if (input && window.matchMedia("(min-width: 861px)").matches) input.focus();
   }
-  function minimizeCopilot() {
-    if (currentView === "home") return; // hero can't be minimized
-    els.floatDock.classList.add("is-hidden");
+  function closeCopilot() {
+    document.documentElement.classList.add("copilot-off");
     els.fab.hidden = false;
   }
 
@@ -160,7 +144,6 @@
 
   /* ---------------- SIDEBAR (collapse + mobile) ---------------- */
   function initNav() {
-    // tooltips for the collapsed (icon-only) state
     els.sidebar.querySelectorAll(".navitem").forEach(function (n) {
       var span = n.querySelector("span:not(.tag)");
       if (span && !n.title) n.title = span.textContent;
@@ -417,7 +400,16 @@
     document.querySelectorAll("[data-close-modal]").forEach(function (b) { b.addEventListener("click", closeModal); });
   }
 
-  /* ---------------- datetime helpers ---------------- */
+  /* ---------------- helpers ---------------- */
+  function trim(s, n) { s = String(s); return s.length > n ? s.slice(0, n - 1) + "…" : s; }
+  function whenShort(d) {
+    var dayName = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+    var today = new Date(); today.setHours(0,0,0,0);
+    var that = new Date(d); that.setHours(0,0,0,0);
+    var diff = Math.round((that - today) / 86400000);
+    var rel = diff === 0 ? "Today" : diff === 1 ? "Tomorrow" : dayName;
+    return rel + ", " + D.fmtHourMin(d);
+  }
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
   function toLocalInput(d) {
     return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
@@ -432,15 +424,14 @@
   function boot() {
     els.sidebar = document.getElementById("sidebar");
     els.scrim = document.getElementById("sidebarScrim");
-    els.head = document.getElementById("mainHead");
+    els.rangeHost = document.getElementById("rangeHost");
     els.stats = document.getElementById("statsRow");
     els.tips = document.getElementById("tipsList");
+    els.upNext = document.getElementById("upNextCard");
     els.views = {
       scheduler: document.getElementById("view-scheduler"),
       automations: document.getElementById("view-automations")
     };
-    els.homeSlot = document.getElementById("homeCopilotSlot");
-    els.floatDock = document.getElementById("floatDock");
     els.copilot = document.getElementById("copilot");
     els.fab = document.getElementById("copilotFab");
     els.themeToggle = document.getElementById("themeToggle");
@@ -450,8 +441,10 @@
 
     els.modal.querySelector(".modal__backdrop").addEventListener("click", closeModal);
 
-    // nav (view switchers + "coming soon" tools) — scoped to the sidebar so
-    // clicks inside a <section class="view" data-view="..."> don't bubble up here.
+    // tab bar + sidebar nav both switch views
+    document.querySelectorAll(".tab").forEach(function (t) {
+      t.addEventListener("click", function () { switchView(t.getAttribute("data-view")); });
+    });
     els.sidebar.querySelectorAll("[data-view]").forEach(function (n) {
       n.addEventListener("click", function () { switchView(n.getAttribute("data-view")); });
     });
@@ -459,9 +452,11 @@
       n.addEventListener("click", function () { toast(n.getAttribute("data-soon") + " is not part of this prototype"); });
     });
 
-    // copilot float controls
-    els.fab.addEventListener("click", openFloatingCopilot);
-    document.getElementById("copilotMin").addEventListener("click", minimizeCopilot);
+    // copilot collapse / reopen
+    els.fab.addEventListener("click", openCopilot);
+    document.getElementById("copilotMin").addEventListener("click", closeCopilot);
+    // on narrow screens the copilot overlays content, so start collapsed
+    if (window.matchMedia("(max-width: 1200px)").matches) closeCopilot();
 
     // mobile menu
     document.getElementById("menuBtn").addEventListener("click", openSidebar);
@@ -469,13 +464,13 @@
 
     initTheme();
     initNav();
-    renderTips();
-    switchView("home");     // places copilot in the hero slot + renders header/stats
+    renderRangeFilter();
+    renderStats();
+    switchView("overview");
     window.Chatbot.init();
   }
 
-  // keep the copilot visible after an action (float open when off-home)
-  function showCopilot() { if (currentView !== "home") openFloatingCopilot(); }
+  function showCopilot() { openCopilot(); }
 
   window.App = {
     refresh: refresh,

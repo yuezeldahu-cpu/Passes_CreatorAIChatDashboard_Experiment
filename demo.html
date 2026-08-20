@@ -65,6 +65,7 @@
 
   --side-w: 250px;
   --side-w-collapsed: 76px;
+  --copilot-w: 380px;
 }
 
 /* --- DARK palette (mapped from Passes Dark mode tokens) --- */
@@ -208,8 +209,9 @@ button { font-family: inherit; cursor: pointer; }
 .sidebar__scrim { position: fixed; inset: 0; z-index: 39; background: rgba(10,20,25,.4); }
 
 /* ===================== MAIN ===================== */
-.main { margin-left: var(--side-w); min-height: 100vh; padding: 26px 30px 60px; }
-.wrap { max-width: 1060px; margin: 0 auto; }
+.main { margin-left: var(--side-w); margin-right: var(--copilot-w); min-height: 100vh; padding: 26px 30px 60px; transition: margin .2s ease; }
+.copilot-off .main { margin-right: 0; }
+.wrap { max-width: 1000px; margin: 0 auto; }
 
 .mainhead { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
 .mainhead__title { font-family: var(--font-display); font-weight: 600; font-size: 30px; letter-spacing: -.7px; margin: 0; }
@@ -245,14 +247,19 @@ button { font-family: inherit; cursor: pointer; }
 .stat__delta.down { color: var(--bad); }
 .stat__delta.flat { color: var(--ink-2); }
 
+/* ===================== TABS ===================== */
+.tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.tab { background: transparent; border: none; color: var(--ink-1); font-weight: 500; font-size: 14.5px; padding: 10px 14px; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s, border-color .15s; }
+.tab:hover { color: var(--ink-0); }
+.tab.is-active { color: var(--accent-text); border-bottom-color: var(--accent); }
+
 /* ===================== VIEWS ===================== */
 .view { display: none; animation: fade .25s ease; }
 .view.is-active { display: block; }
 @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
-/* HOME layout: centered copilot hero + what's-new row */
-.home { display: flex; flex-direction: column; gap: 20px; }
-.copilot-slot { display: flex; justify-content: center; }
+/* OVERVIEW layout: what's-new (banner + tips) + up next */
+.overview { display: flex; flex-direction: column; gap: 16px; }
 .whatsnew { display: grid; grid-template-columns: 300px 1fr; gap: 16px; }
 
 /* ===================== CARDS / GENERIC ===================== */
@@ -359,19 +366,13 @@ button { font-family: inherit; cursor: pointer; }
 .switch input:checked + .switch__track { background: var(--accent); }
 .switch input:checked + .switch__track::before { transform: translateX(18px); }
 
-/* ===================== COPILOT ===================== */
+/* ===================== COPILOT (docked right) ===================== */
 .copilot {
+  position: fixed; top: 0; right: 0; bottom: 0; width: var(--copilot-w); z-index: 45;
   display: flex; flex-direction: column; background: var(--surface);
-  border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow);
-  overflow: hidden;
+  border-left: 1px solid var(--border);
 }
-/* docked (home hero) */
-.copilot-slot .copilot { width: 100%; max-width: 720px; height: 560px; }
-/* floating (other pages) */
-.floatdock { position: fixed; right: 22px; bottom: 22px; z-index: 70; width: 380px; max-width: calc(100vw - 32px); }
-.floatdock .copilot { height: 540px; max-height: calc(100vh - 120px); }
-.floatdock:empty { display: none; }
-.floatdock.is-hidden { display: none; }
+.copilot-off .copilot { display: none; }
 
 .copilot__head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--surface); }
 .copilot__id { display: flex; align-items: center; gap: 11px; }
@@ -380,8 +381,6 @@ button { font-family: inherit; cursor: pointer; }
 .copilot__name { font-family: var(--font-display); font-weight: 600; font-size: 15px; }
 .copilot__status { font-size: 11.5px; color: var(--accent-text); }
 .copilot__min { border: 1px solid var(--border); }
-/* min button only relevant when floating */
-.copilot-slot .copilot__min { display: none; }
 
 .chat { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; background: var(--app); }
 .msg { display: flex; gap: 9px; max-width: 100%; animation: msgIn .22s ease; }
@@ -487,6 +486,11 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 /* ===================== RESPONSIVE ===================== */
+/* Below this width the copilot stops pushing content and floats as an overlay. */
+@media (max-width: 1200px) {
+  .main { margin-right: 0; }
+  .copilot { box-shadow: var(--shadow); }
+}
 @media (max-width: 1040px) {
   .whatsnew { grid-template-columns: 1fr; }
   .stats { grid-template-columns: repeat(2, 1fr); }
@@ -495,17 +499,17 @@ button { font-family: inherit; cursor: pointer; }
   .sidebar { transform: translateX(-100%); transition: transform .25s ease; }
   .sidebar.is-open { transform: none; }
   .sidebar__foot { transform: translateX(-100%); transition: transform .25s ease; }
-  .sidebar.is-open ~ .sidebar__foot, .sidebar.is-open .sidebar__foot { transform: none; }
+  .sidebar.is-open .sidebar__foot { transform: none; }
   .main { margin-left: 0; padding: 70px 18px 60px; }
   .menubtn { display: grid; place-items: center; }
-  .copilot-slot .copilot { height: 520px; }
 }
 @media (max-width: 560px) {
   .stats { grid-template-columns: 1fr 1fr; gap: 10px; }
   .mainhead__title { font-size: 24px; }
   .qitem { grid-template-columns: 64px 1fr; }
   .qitem__actions { grid-column: 1 / -1; justify-content: flex-end; }
-  .floatdock { right: 10px; left: 10px; width: auto; }
+  .copilot { width: min(400px, 100vw); }
+  .fab { right: 14px; bottom: 14px; }
 }
 
 </style>
@@ -525,7 +529,7 @@ button { font-family: inherit; cursor: pointer; }
     })();
   </script>
 
-  <!-- ========== LEFT SIDEBAR ========== -->
+  <!-- ========== LEFT SIDEBAR (foldable) ========== -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar__inner">
       <div class="sidebar__top">
@@ -541,7 +545,7 @@ button { font-family: inherit; cursor: pointer; }
       </div>
 
       <div class="iconrow">
-        <button class="iconbtn is-active" data-view="home" title="Home" aria-label="Home">
+        <button class="iconbtn is-active" data-view="overview" title="Home" aria-label="Home">
           <svg viewBox="0 0 24 24" class="ic"><path d="M4 11l8-6 8 6M6 10v9h12v-9"/></svg>
         </button>
         <button class="iconbtn" data-soon="Messages" title="Messages" aria-label="Messages">
@@ -627,16 +631,22 @@ button { font-family: inherit; cursor: pointer; }
   <!-- ========== MAIN ========== -->
   <main class="main" id="main">
     <div class="wrap">
-      <header class="mainhead" id="mainHead"></header>
+      <header class="mainhead">
+        <div><h1 class="mainhead__title">Welcome back, Ava!</h1></div>
+        <div id="rangeHost"></div>
+      </header>
 
       <section class="stats" id="statsRow" aria-label="Key metrics"></section>
 
-      <!-- HOME VIEW -->
-      <section class="view is-active" data-view="home" id="view-home">
-        <div class="home">
-          <!-- centered copilot slot -->
-          <div class="copilot-slot" id="homeCopilotSlot"></div>
-          <!-- what's new / notifications -->
+      <nav class="tabs" role="tablist" aria-label="Dashboard sections">
+        <button class="tab is-active" role="tab" data-view="overview">Overview</button>
+        <button class="tab" role="tab" data-view="scheduler">Smart Scheduler</button>
+        <button class="tab" role="tab" data-view="automations">Automated Messages</button>
+      </nav>
+
+      <!-- OVERVIEW -->
+      <section class="view is-active" data-view="overview" id="view-overview">
+        <div class="overview">
           <div class="whatsnew">
             <div class="banner" role="img" aria-label="New livestream experience">
               <div class="banner__glass"></div>
@@ -654,19 +664,20 @@ button { font-family: inherit; cursor: pointer; }
               <div id="tipsList" class="actionlist"></div>
             </div>
           </div>
+          <div class="card" id="upNextCard"></div>
         </div>
       </section>
 
-      <!-- SCHEDULER VIEW -->
+      <!-- SMART SCHEDULER -->
       <section class="view" data-view="scheduler" id="view-scheduler"></section>
 
-      <!-- AUTOMATIONS VIEW -->
+      <!-- AUTOMATED MESSAGES -->
       <section class="view" data-view="automations" id="view-automations"></section>
     </div>
   </main>
 
-  <!-- ========== COPILOT (reparented between home slot & floating dock) ========== -->
-  <div class="copilot" id="copilot">
+  <!-- ========== COPILOT (docked right) ========== -->
+  <aside class="copilot" id="copilot" aria-label="AI copilot">
     <div class="copilot__head">
       <div class="copilot__id">
         <span class="copilot__dot" aria-hidden="true"></span>
@@ -675,7 +686,7 @@ button { font-family: inherit; cursor: pointer; }
           <div class="copilot__status">Schedule posts &amp; DMs, on autopilot</div>
         </div>
       </div>
-      <button class="iconbtn copilot__min" id="copilotMin" aria-label="Minimize copilot" title="Minimize">–</button>
+      <button class="iconbtn copilot__min" id="copilotMin" aria-label="Collapse copilot" title="Collapse">×</button>
     </div>
     <div class="chat" id="chatLog" aria-live="polite"></div>
     <div class="chat__suggest" id="chatSuggest"></div>
@@ -684,10 +695,8 @@ button { font-family: inherit; cursor: pointer; }
              placeholder="Try: schedule a post tomorrow at the best time" aria-label="Message your copilot" />
       <button class="composer__send" type="submit" aria-label="Send">↑</button>
     </form>
-  </div>
+  </aside>
 
-  <!-- floating dock (holds copilot on non-home pages) -->
-  <div class="floatdock" id="floatDock"></div>
   <button class="fab" id="copilotFab" hidden aria-label="Open copilot">
     <span class="fab__spark" aria-hidden="true">✦</span>
     <span class="fab__label">Copilot</span>
@@ -2191,9 +2200,9 @@ button { font-family: inherit; cursor: pointer; }
 </script>
 <script>
 /* ============================================================
-   app.js — shell: sidebar nav, views, stats + range filter,
-   theme toggle, copilot reparenting (centered <-> floating),
-   modals (schedule w/ media upload, automations), toasts, boot.
+   app.js — shell: foldable sidebar nav, tabbed views,
+   stats + range filter, right-docked copilot (collapse + FAB),
+   theme toggle, modals (schedule w/ media upload), toasts, boot.
    Exposes: window.App, window.SchedulerUI, window.AutomationsUI
    ============================================================ */
 (function () {
@@ -2202,12 +2211,12 @@ button { font-family: inherit; cursor: pointer; }
   var S = window.Scheduler;
   var A = window.Automations;
 
-  var currentView = "home";
+  var currentView = "overview";
   var currentRange = "week"; // matches the reference screenshot
   var CREATOR = "Ava";
   var els = {};
 
-  /* ---------------- STATS + HEADER ---------------- */
+  /* ---------------- STATS + RANGE FILTER ---------------- */
   function renderStats() {
     var rows = D.rangeStats[currentRange] || D.rangeStats.week;
     els.stats.innerHTML = D.STAT_LABELS.map(function (label, i) {
@@ -2220,56 +2229,38 @@ button { font-family: inherit; cursor: pointer; }
     }).join("");
   }
 
-  function renderHeader() {
-    if (currentView === "home") {
-      els.head.innerHTML =
-        '<div><h1 class="mainhead__title">Welcome back, ' + CREATOR + '!</h1></div>' +
-        rangeFilterHTML();
-      wireRangeFilter();
-    } else if (currentView === "scheduler") {
-      els.head.innerHTML = '<div><h1 class="mainhead__title">Smart Scheduler</h1>' +
-        '<p class="mainhead__sub">Plan posts and mass DMs at the smartest times.</p></div>';
-    } else {
-      els.head.innerHTML = '<div><h1 class="mainhead__title">Automated Messages</h1>' +
-        '<p class="mainhead__sub">Flows that message fans on autopilot.</p></div>';
-    }
-  }
-
-  function rangeFilterHTML() {
+  function renderRangeFilter() {
     var cur = D.RANGES.filter(function (r) { return r.id === currentRange; })[0];
     var menu = D.RANGES.map(function (r) {
       return '<button data-range="' + r.id + '" class="' + (r.id === currentRange ? "is-active" : "") + '">' + r.label + '</button>';
     }).join("");
-    return '<div class="rangefilter" id="rangeFilter">' +
+    els.rangeHost.innerHTML =
+      '<div class="rangefilter">' +
       '<button class="rangefilter__btn" id="rangeBtn">' + cur.label +
       ' <svg viewBox="0 0 24 24" class="ic ic-sm"><path d="M6 9l6 6 6-6"/></svg></button>' +
-      '<div class="rangefilter__menu" id="rangeMenu" hidden>' + menu + '</div></div>';
-  }
-  function wireRangeFilter() {
+      '<div class="rangefilter__menu" id="rangeMenu" hidden></div></div>';
+    document.getElementById("rangeMenu").innerHTML = menu;
+
     var btn = document.getElementById("rangeBtn");
-    var menu = document.getElementById("rangeMenu");
-    if (!btn) return;
-    btn.addEventListener("click", function (e) {
-      e.stopPropagation();
-      menu.hidden = !menu.hidden;
-    });
-    menu.querySelectorAll("[data-range]").forEach(function (b) {
+    var menuEl = document.getElementById("rangeMenu");
+    btn.addEventListener("click", function (e) { e.stopPropagation(); menuEl.hidden = !menuEl.hidden; });
+    menuEl.querySelectorAll("[data-range]").forEach(function (b) {
       b.addEventListener("click", function () {
         currentRange = b.getAttribute("data-range");
-        menu.hidden = true;
-        renderHeader();
+        menuEl.hidden = true;
+        renderRangeFilter();
         renderStats();
       });
     });
-    document.addEventListener("click", function () { if (menu) menu.hidden = true; });
+    document.addEventListener("click", function () { if (menuEl) menuEl.hidden = true; });
   }
 
-  /* ---------------- TIPS (what's new) ---------------- */
+  /* ---------------- OVERVIEW (tips + up next) ---------------- */
   function renderTips() {
     var w = D.bestWindows(1)[0];
     var peak = D.DAYS[w.day] + " " + D.fmtHour(w.hour);
     var tips = [
-      { icon: "✦", title: "Copilot works on every page", desc: "Tap the Copilot button anywhere to schedule a post or mass DM in seconds." },
+      { icon: "✦", title: "Ask your copilot anything", desc: "It schedules posts and mass DMs, prices them, and builds automations from a sentence." },
       { icon: "🕒", title: "Your fans peak at " + peak, desc: "Schedule your next drop then for the biggest reach." },
       { icon: "🔁", title: A.activeCount() + " automations running", desc: "New subscribers and win-backs are handled for you on autopilot." }
     ];
@@ -2280,62 +2271,64 @@ button { font-family: inherit; cursor: pointer; }
     }).join("");
   }
 
-  /* ---------------- VIEW SWITCHING ---------------- */
+  function renderUpNext() {
+    var next = D.queue.filter(function (q) { return q.status === "scheduled"; })
+      .sort(function (a, b) { return a.when - b.when; })[0];
+    var html = '<div class="card__head"><div><h3 class="card__title">Up next</h3></div>' +
+      '<button class="btn btn--ghost btn--sm" data-goto-scheduler>View queue</button></div>';
+    if (next) {
+      var q = S.timeQuality(next.when);
+      html += '<div class="action-tip">' +
+        '<div class="action-tip__icon">' + (next.kind === "dm" ? "💌" : "🖼️") + '</div>' +
+        '<div class="action-tip__body">' +
+        '<div class="action-tip__title">' + (next.kind === "dm" ? "Mass DM" : "Post") + " · " + whenShort(next.when) + '</div>' +
+        '<div class="action-tip__desc">' + S.esc(trim(next.text, 90)) + '</div>' +
+        '<div class="small" style="margin-top:6px"><span class="stat__delta ' + q.cls + '">' + q.label + '</span></div>' +
+        '</div></div>';
+    } else {
+      html += '<div class="empty">Nothing queued yet. Ask the copilot to schedule something.</div>';
+    }
+    els.upNext.innerHTML = html;
+    var b = els.upNext.querySelector("[data-goto-scheduler]");
+    if (b) b.addEventListener("click", function () { switchView("scheduler"); });
+  }
+
+  function renderOverview() { renderTips(); renderUpNext(); }
+
+  /* ---------------- VIEW SWITCHING (tabs + nav) ---------------- */
   function switchView(view) {
-    if (view === "overview") view = "home";
+    if (view === "home") view = "overview";
     currentView = view;
 
-    // nav highlight
-    document.querySelectorAll(".navitem, .iconbtn[data-view]").forEach(function (n) {
+    document.querySelectorAll(".tab").forEach(function (t) {
+      t.classList.toggle("is-active", t.getAttribute("data-view") === view);
+    });
+    els.sidebar.querySelectorAll("[data-view]").forEach(function (n) {
       n.classList.toggle("is-active", n.getAttribute("data-view") === view);
     });
-
-    // views
     document.querySelectorAll(".view").forEach(function (v) {
       v.classList.toggle("is-active", v.getAttribute("data-view") === view);
     });
 
-    els.stats.style.display = view === "home" ? "" : "none";
-
-    placeCopilot(view);
-    renderHeader();
-    if (view === "home") renderStats();
     renderCurrentPanel();
     closeSidebar();
   }
-
   function renderCurrentPanel() {
-    if (currentView === "scheduler") S.renderPanel(els.views.scheduler);
+    if (currentView === "overview") renderOverview();
+    else if (currentView === "scheduler") S.renderPanel(els.views.scheduler);
     else if (currentView === "automations") A.renderPanel(els.views.automations);
   }
+  function refresh() { renderStats(); renderCurrentPanel(); }
 
-  function refresh() {
-    if (currentView === "home") { renderStats(); renderTips(); }
-    renderCurrentPanel();
-  }
-
-  /* ---------------- COPILOT: dock vs float ---------------- */
-  function placeCopilot(view) {
-    if (view === "home") {
-      els.homeSlot.appendChild(els.copilot);
-      els.floatDock.classList.add("is-hidden");
-      els.fab.hidden = true;
-    } else {
-      els.floatDock.appendChild(els.copilot);
-      // start collapsed: only the FAB shows until the creator opens it
-      els.floatDock.classList.add("is-hidden");
-      els.fab.hidden = false;
-    }
-  }
-  function openFloatingCopilot() {
-    els.floatDock.classList.remove("is-hidden");
+  /* ---------------- COPILOT (docked / collapse) ---------------- */
+  function openCopilot() {
+    document.documentElement.classList.remove("copilot-off");
     els.fab.hidden = true;
     var input = document.getElementById("chatInput");
-    if (input) input.focus();
+    if (input && window.matchMedia("(min-width: 861px)").matches) input.focus();
   }
-  function minimizeCopilot() {
-    if (currentView === "home") return; // hero can't be minimized
-    els.floatDock.classList.add("is-hidden");
+  function closeCopilot() {
+    document.documentElement.classList.add("copilot-off");
     els.fab.hidden = false;
   }
 
@@ -2352,7 +2345,6 @@ button { font-family: inherit; cursor: pointer; }
 
   /* ---------------- SIDEBAR (collapse + mobile) ---------------- */
   function initNav() {
-    // tooltips for the collapsed (icon-only) state
     els.sidebar.querySelectorAll(".navitem").forEach(function (n) {
       var span = n.querySelector("span:not(.tag)");
       if (span && !n.title) n.title = span.textContent;
@@ -2609,7 +2601,16 @@ button { font-family: inherit; cursor: pointer; }
     document.querySelectorAll("[data-close-modal]").forEach(function (b) { b.addEventListener("click", closeModal); });
   }
 
-  /* ---------------- datetime helpers ---------------- */
+  /* ---------------- helpers ---------------- */
+  function trim(s, n) { s = String(s); return s.length > n ? s.slice(0, n - 1) + "…" : s; }
+  function whenShort(d) {
+    var dayName = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+    var today = new Date(); today.setHours(0,0,0,0);
+    var that = new Date(d); that.setHours(0,0,0,0);
+    var diff = Math.round((that - today) / 86400000);
+    var rel = diff === 0 ? "Today" : diff === 1 ? "Tomorrow" : dayName;
+    return rel + ", " + D.fmtHourMin(d);
+  }
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
   function toLocalInput(d) {
     return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
@@ -2624,15 +2625,14 @@ button { font-family: inherit; cursor: pointer; }
   function boot() {
     els.sidebar = document.getElementById("sidebar");
     els.scrim = document.getElementById("sidebarScrim");
-    els.head = document.getElementById("mainHead");
+    els.rangeHost = document.getElementById("rangeHost");
     els.stats = document.getElementById("statsRow");
     els.tips = document.getElementById("tipsList");
+    els.upNext = document.getElementById("upNextCard");
     els.views = {
       scheduler: document.getElementById("view-scheduler"),
       automations: document.getElementById("view-automations")
     };
-    els.homeSlot = document.getElementById("homeCopilotSlot");
-    els.floatDock = document.getElementById("floatDock");
     els.copilot = document.getElementById("copilot");
     els.fab = document.getElementById("copilotFab");
     els.themeToggle = document.getElementById("themeToggle");
@@ -2642,8 +2642,10 @@ button { font-family: inherit; cursor: pointer; }
 
     els.modal.querySelector(".modal__backdrop").addEventListener("click", closeModal);
 
-    // nav (view switchers + "coming soon" tools) — scoped to the sidebar so
-    // clicks inside a <section class="view" data-view="..."> don't bubble up here.
+    // tab bar + sidebar nav both switch views
+    document.querySelectorAll(".tab").forEach(function (t) {
+      t.addEventListener("click", function () { switchView(t.getAttribute("data-view")); });
+    });
     els.sidebar.querySelectorAll("[data-view]").forEach(function (n) {
       n.addEventListener("click", function () { switchView(n.getAttribute("data-view")); });
     });
@@ -2651,9 +2653,11 @@ button { font-family: inherit; cursor: pointer; }
       n.addEventListener("click", function () { toast(n.getAttribute("data-soon") + " is not part of this prototype"); });
     });
 
-    // copilot float controls
-    els.fab.addEventListener("click", openFloatingCopilot);
-    document.getElementById("copilotMin").addEventListener("click", minimizeCopilot);
+    // copilot collapse / reopen
+    els.fab.addEventListener("click", openCopilot);
+    document.getElementById("copilotMin").addEventListener("click", closeCopilot);
+    // on narrow screens the copilot overlays content, so start collapsed
+    if (window.matchMedia("(max-width: 1200px)").matches) closeCopilot();
 
     // mobile menu
     document.getElementById("menuBtn").addEventListener("click", openSidebar);
@@ -2661,13 +2665,13 @@ button { font-family: inherit; cursor: pointer; }
 
     initTheme();
     initNav();
-    renderTips();
-    switchView("home");     // places copilot in the hero slot + renders header/stats
+    renderRangeFilter();
+    renderStats();
+    switchView("overview");
     window.Chatbot.init();
   }
 
-  // keep the copilot visible after an action (float open when off-home)
-  function showCopilot() { if (currentView !== "home") openFloatingCopilot(); }
+  function showCopilot() { openCopilot(); }
 
   window.App = {
     refresh: refresh,
