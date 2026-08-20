@@ -1,0 +1,93 @@
+# Passes Creator Dashboard · AI Copilot
+
+An experimental prototype of an **AI chatbot on the Passes creator dashboard** that lets
+creators schedule content smartly and build automated message flows from plain-language
+requests. It brings the power of the **Smart Scheduler** and **Automated Messages** tools
+into a single conversational copilot.
+
+The **Copilot is docked on the right** and is available across every tab, so a creator can
+schedule a post or mass DM from anywhere. It collapses to a launcher button when not needed.
+
+> Prototype only. Self-contained, no build step, no backend, no API keys. All data is
+> illustrative sample data (no real creators).
+
+## Layout
+
+- **Foldable left sidebar** matching the product: Creator Tools (Vault, Lists, Scheduler,
+  Start Livestream, Post Categories, Manage Memberships, Integrations) and Smart Tools
+  (Smart Scheduler, Automated Messages), with the account switcher and Create button.
+  Folded to an icon rail by default; the chevron expands it (state remembered).
+- A "Welcome back" header with a working **time-range filter**
+  (Today / This Week / This Month / All Time) and four product metrics
+  (New Profile Visits, New Memberships, 1:1 DM Revenue, Membership Revenue).
+- **Tabs**: Overview, Smart Scheduler, Automated Messages. Overview shows a **What's new**
+  area with the livestream banner and tips, plus an "Up next" card.
+- **Right-docked Copilot**, collapsible to a launcher button.
+- **Light and dark themes** with a toggle, using the Passes design-system color tokens
+  (defaults to light to match the product).
+
+## Try it
+
+Open `index.html` in any modern browser. That's it, there is no build step.
+
+```
+open index.html      # macOS
+xdg-open index.html  # Linux
+```
+
+## What the copilot can do
+
+Type into the copilot on the right, or tap a suggestion. It understands natural language,
+figures out what you want, and drives the real dashboard tools.
+
+### Smart Scheduler (same functions as the Smart Scheduler tool)
+- **Optimal timing** from an engagement heatmap of when your fans are actually online.
+- **Smart pricing** suggestions based on audience segment and content type.
+- **AI captions** written in the creator's voice (brand-safe, on-brand tone).
+- **Media upload** in the schedule editor: drag-and-drop or browse photos and videos, with thumbnails.
+- **Visual queue** for both **Posts** and **Mass DMs**: review, edit, or cancel before it goes live.
+
+Try:
+- `Schedule a post tomorrow at the best time`
+- `Send a paid mass DM to my VIPs this weekend`
+- `What's the best time to post today?`
+- `Write me a caption for a behind the scenes post`
+
+### Automated Messages (same functions as the Automated Messages tool)
+- **20+ triggers** across Lifecycle, Revenue, and Engagement (new subscriber, unfollows you,
+  subscription expired, tip received, first purchase, birthday, inactive, going live, and more).
+- **Multi-step flows up to 20 steps** with **timed delays** and **conditional logic**.
+- **Flow builder / detail view** showing the trigger, delays, conditions, and messages.
+- Activate, pause, or delete flows.
+
+Try:
+- `Welcome new subscribers with a 30% off deal`
+- `When a fan unfollows, send a win-back message`
+- `When a subscription expires, re-engage them`
+
+## How the "AI" works
+
+The chatbot uses a **simulated NLU** (`js/nlu.js`): a rule-based intent parser plus entity
+extraction (content type, timing, audience segment, price, trigger, discount, quoted text).
+It runs fully offline with no API key. The design is drop-in ready to swap for a live
+Claude API call later without changing the UI or the tool layer.
+
+## Project structure
+
+```
+index.html          Dashboard shell + copilot panel
+css/styles.css      Passes brand system (Powder Blue scale, Poppins, 80/20 dark UI)
+js/data.js          Mock data: engagement heatmap, segments, 20+ triggers, seeds
+js/scheduler.js     Smart Scheduler engine + queue UI
+js/automations.js   Automated Messages engine + flow UI
+js/nlu.js           Simulated natural-language understanding
+js/chatbot.js       Copilot chat UI + intent orchestration (action cards)
+js/app.js           Dashboard rendering, tabs, modals, toasts, boot
+```
+
+## Design
+
+Follows the Passes brand system: the approved Powder Blue scale as the accent, Poppins for
+display type, and a copilot voice that is effortlessly sharp, supportive, and authentic
+(no em dashes, no SaaS-speak). Ships light-first to match the live product, with a fully
+token-based dark theme behind the toggle.
