@@ -258,9 +258,10 @@ button { font-family: inherit; cursor: pointer; }
 .view.is-active { display: block; }
 @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
-/* OVERVIEW layout: what's-new (banner + tips) + up next */
-.overview { display: flex; flex-direction: column; gap: 16px; }
-.whatsnew { display: grid; grid-template-columns: 300px 1fr; gap: 16px; }
+/* OVERVIEW layout: "What's new" (banner first) beside "Up next" on desktop */
+.overview { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.notif .banner { margin-bottom: 14px; }
+.notif .actionlist { margin-top: 0; }
 
 /* ===================== CARDS / GENERIC ===================== */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow-sm); }
@@ -492,7 +493,7 @@ button { font-family: inherit; cursor: pointer; }
   .copilot { box-shadow: var(--shadow); }
 }
 @media (max-width: 1040px) {
-  .whatsnew { grid-template-columns: 1fr; }
+  .overview { grid-template-columns: 1fr; }
   .stats { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 860px) {
@@ -647,7 +648,8 @@ button { font-family: inherit; cursor: pointer; }
       <!-- OVERVIEW -->
       <section class="view is-active" data-view="overview" id="view-overview">
         <div class="overview">
-          <div class="whatsnew">
+          <div class="card notif">
+            <div class="card__head"><h3 class="card__title">What's new for you</h3></div>
             <div class="banner" role="img" aria-label="New livestream experience">
               <div class="banner__glass"></div>
               <div class="banner__content">
@@ -659,10 +661,7 @@ button { font-family: inherit; cursor: pointer; }
               <span class="banner__c banner__c2"></span>
               <span class="banner__c banner__c3"></span>
             </div>
-            <div class="card notif">
-              <div class="card__head"><h3 class="card__title">What's new for you</h3></div>
-              <div id="tipsList" class="actionlist"></div>
-            </div>
+            <div id="tipsList" class="actionlist"></div>
           </div>
           <div class="card" id="upNextCard"></div>
         </div>
