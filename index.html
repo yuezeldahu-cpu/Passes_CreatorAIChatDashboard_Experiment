@@ -12,22 +12,32 @@
 </head>
 <body>
   <script>
-    // set theme before paint to avoid a flash (default: light, matching the product)
+    // set theme + nav state before paint to avoid a flash
+    // (defaults: light theme to match the product, side nav folded)
     (function () {
-      try { document.documentElement.setAttribute("data-theme", localStorage.getItem("passes-theme") || "light"); }
-      catch (e) { document.documentElement.setAttribute("data-theme", "light"); }
+      var theme = "light", nav = "collapsed";
+      try { theme = localStorage.getItem("passes-theme") || "light"; } catch (e) {}
+      try { nav = localStorage.getItem("passes-nav") || "collapsed"; } catch (e) {}
+      var r = document.documentElement;
+      r.setAttribute("data-theme", theme);
+      if (nav === "collapsed") r.classList.add("nav-collapsed");
     })();
   </script>
 
   <!-- ========== LEFT SIDEBAR ========== -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar__inner">
-      <a class="brand" href="#" aria-label="passes home">
-        <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
-          <rect x="14" y="4" width="14" height="14" rx="4" fill="currentColor"/>
-          <circle cx="8" cy="24" r="4" fill="currentColor"/>
-        </svg>
-      </a>
+      <div class="sidebar__top">
+        <a class="brand" href="#" aria-label="passes home">
+          <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
+            <rect x="14" y="4" width="14" height="14" rx="4" fill="currentColor"/>
+            <circle cx="8" cy="24" r="4" fill="currentColor"/>
+          </svg>
+        </a>
+        <button class="navtoggle" id="navToggle" aria-label="Expand menu" title="Expand / collapse menu">
+          <svg viewBox="0 0 24 24" class="ic ic-sm navtoggle__chev"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+      </div>
 
       <div class="iconrow">
         <button class="iconbtn is-active" data-view="home" title="Home" aria-label="Home">
@@ -102,9 +112,9 @@
           <span class="userswitch__avatar">🐵</span>
           <svg viewBox="0 0 24 24" class="ic ic-sm"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>
         </button>
-        <button class="btn btn--create" data-soon="Create">
+        <button class="btn btn--create" data-soon="Create" title="Create">
           <svg viewBox="0 0 24 24" class="ic ic-sm"><path d="M12 5v14M5 12h14"/></svg>
-          Create
+          <span class="btn__label">Create</span>
         </button>
       </div>
     </div>

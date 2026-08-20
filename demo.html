@@ -23,35 +23,37 @@
   --pb-300:#67E3F9; --pb-400:#22CCEE; --pb-500:#06AED4; --pb-600:#088AB2;
   --pb-700:#0E7090; --pb-800:#155B75; --pb-900:#164C63; --pb-950:#0D2D3A;
 
-  /* --- LIGHT palette --- */
-  --app:      #F5F7F8;
-  --surface:  #FFFFFF;
+  /* --- LIGHT palette (mapped from Passes Light mode tokens) --- */
+  --app:      #F8FAFF;   /* bg-secondary */
+  --surface:  #FFFFFF;   /* bg-primary */
   --surface-2:#FFFFFF;
-  --raise:    #FBFCFD;
-  --hover:    #F1F4F6;
-  --border:   #E7EBEE;
-  --border-2: #DCE2E6;
-  --line:     #EDF0F2;
+  --raise:    #FDFDFF;   /* bg-secondary-subtle */
+  --hover:    #F3F4FA;   /* bg-tertiary */
+  --border:   #E8E9EF;   /* border-secondary */
+  --border-2: #D4D6DF;   /* border-primary */
+  --line:     #F3F4FA;   /* border-tertiary */
 
-  --ink-0: #14181B;
-  --ink-1: #55636C;
-  --ink-2: #8B98A1;
+  --ink-0: #1B1D23;      /* text-primary */
+  --ink-1: #43464F;      /* text-secondary */
+  --ink-2: #737581;      /* text-quaternary / placeholder */
 
-  --accent:      #06AED4;   /* pb-500 */
-  --accent-deep: #0E7090;   /* pb-700 */
-  --accent-text: #0E7090;   /* accent used as text on light tints */
-  --accent-soft: #ECFDFF;   /* pb-50  */
-  --ink-on-accent:      #043b48;  /* dark ink on bright accent button */
-  --ink-on-accent-deep: #FFFFFF;  /* text on deep accent (user bubble) */
+  --accent:      #06AED4;   /* brand-500 */
+  --accent-deep: #0E7090;   /* brand-700 */
+  --accent-text: #0E7090;   /* text-brand-secondary (on light) */
+  --accent-soft: #ECFDFF;   /* bg-brand-primary */
+  --brand-solid:       #088AB2;  /* bg-brand-solid */
+  --brand-solid-hover: #0E7090;  /* bg-brand-solid-hover */
+  --on-brand-solid:    #FFFFFF;  /* text-primary-on-brand */
+  --ink-on-accent-deep:#FFFFFF;  /* text on deep-accent bubble */
 
-  --good:#12805C; --good-soft:#E4F7EF; --good-bd:#BEE9D8;
-  --warn:#8A5A00; --warn-soft:#FBF1DD; --warn-bd:#EFD9AC;
-  --bad:#C0323E;  --bad-soft:#FCEBED;  --bad-bd:#F1C4C9;
+  --good:#067647; --good-soft:#ECFDF3; --good-bd:#ABEFC6;   /* success */
+  --warn:#B54708; --warn-soft:#FFFAEB; --warn-bd:#FEDF89;   /* warning */
+  --bad:#D92D20;  --bad-soft:#FEF3F2;  --bad-bd:#FDA29B;    /* error */
 
   --post-text:#0E7090; --post-bg:#ECFDFF; --post-bd:#A5F0FC;
   --dm-text:#6B3FB0;   --dm-bg:#F2ECFD;  --dm-bd:#DDD0F5;
 
-  --create-bg:#111517; --create-text:#FFFFFF;
+  --create-bg:#0B0C12; --create-text:#FFFFFF;  /* bg-primary-solid */
 
   --radius:16px; --radius-sm:11px;
   --shadow:    0 10px 30px rgba(20,30,40,.10);
@@ -62,41 +64,44 @@
   --font-body:"Inter", system-ui, -apple-system, sans-serif;
 
   --side-w: 250px;
+  --side-w-collapsed: 76px;
 }
 
-/* --- DARK palette (OS dark, unless user forced light) --- */
+/* --- DARK palette (mapped from Passes Dark mode tokens) --- */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --app:#0A0F12; --surface:#141D22; --surface-2:#101A1F; --raise:#0F161A;
-    --hover:#1B262C; --border:#212E35; --border-2:#28373F; --line:#1B262C;
-    --ink-0:#EAF3F6; --ink-1:#A7BAC2; --ink-2:#6E828C;
-    --accent:#22CCEE; --accent-deep:#67E3F9; --accent-text:#67E3F9; --accent-soft:rgba(34,204,238,.12);
-    --ink-on-accent:#04222b; --ink-on-accent-deep:#04222b;
-    --good:#3ddc97; --good-soft:rgba(61,220,151,.14); --good-bd:#1f5a44;
-    --warn:#f5b342; --warn-soft:rgba(245,179,66,.14); --warn-bd:#5a4520;
-    --bad:#f0616d;  --bad-soft:rgba(240,97,109,.12);  --bad-bd:#5a2a30;
-    --post-text:#A5F0FC; --post-bg:rgba(8,138,178,.16); --post-bd:#0E7090;
-    --dm-text:#d6b8ff;   --dm-bg:rgba(120,80,200,.18);  --dm-bd:#40306b;
-    --create-bg:#EAF3F6; --create-text:#0A0F12;
+    --app:#0B0C12; --surface:#1B1D23; --surface-2:#1B1D23; --raise:#1B1D23;
+    --hover:#292A31; --border:#292A31; --border-2:#43464F; --line:#292A31;
+    --ink-0:#F8FAFF; --ink-1:#D4D6DF; --ink-2:#A4A7B3;
+    --accent:#06AED4; --accent-deep:#67E3F9; --accent-text:#A5F0FC; --accent-soft:rgba(6,174,212,.16);
+    --brand-solid:#088AB2; --brand-solid-hover:#06AED4; --on-brand-solid:#F8FAFF;
+    --ink-on-accent-deep:#04222b;
+    --good:#47CD89; --good-soft:rgba(23,178,106,.16); --good-bd:#085D3A;
+    --warn:#FDB022; --warn-soft:rgba(247,144,9,.16); --warn-bd:#93370D;
+    --bad:#F97066;  --bad-soft:rgba(240,68,56,.16);   --bad-bd:#912018;
+    --post-text:#A5F0FC; --post-bg:rgba(8,138,178,.20); --post-bd:#0E7090;
+    --dm-text:#D6B8FF;   --dm-bg:rgba(120,80,200,.20);  --dm-bd:#40306b;
+    --create-bg:#F8FAFF; --create-text:#0B0C12;
     --shadow:0 14px 40px rgba(0,0,0,.5); --shadow-sm:0 4px 16px rgba(0,0,0,.35);
-    --ring:0 0 0 3px rgba(34,204,238,.32);
+    --ring:0 0 0 3px rgba(6,174,212,.35);
   }
 }
 /* --- DARK palette (explicit toggle) --- */
 :root[data-theme="dark"] {
-  --app:#0A0F12; --surface:#141D22; --surface-2:#101A1F; --raise:#0F161A;
-  --hover:#1B262C; --border:#212E35; --border-2:#28373F; --line:#1B262C;
-  --ink-0:#EAF3F6; --ink-1:#A7BAC2; --ink-2:#6E828C;
-  --accent:#22CCEE; --accent-deep:#67E3F9; --accent-text:#67E3F9; --accent-soft:rgba(34,204,238,.12);
-  --ink-on-accent:#04222b; --ink-on-accent-deep:#04222b;
-  --good:#3ddc97; --good-soft:rgba(61,220,151,.14); --good-bd:#1f5a44;
-  --warn:#f5b342; --warn-soft:rgba(245,179,66,.14); --warn-bd:#5a4520;
-  --bad:#f0616d;  --bad-soft:rgba(240,97,109,.12);  --bad-bd:#5a2a30;
-  --post-text:#A5F0FC; --post-bg:rgba(8,138,178,.16); --post-bd:#0E7090;
-  --dm-text:#d6b8ff;   --dm-bg:rgba(120,80,200,.18);  --dm-bd:#40306b;
-  --create-bg:#EAF3F6; --create-text:#0A0F12;
+  --app:#0B0C12; --surface:#1B1D23; --surface-2:#1B1D23; --raise:#1B1D23;
+  --hover:#292A31; --border:#292A31; --border-2:#43464F; --line:#292A31;
+  --ink-0:#F8FAFF; --ink-1:#D4D6DF; --ink-2:#A4A7B3;
+  --accent:#06AED4; --accent-deep:#67E3F9; --accent-text:#A5F0FC; --accent-soft:rgba(6,174,212,.16);
+  --brand-solid:#088AB2; --brand-solid-hover:#06AED4; --on-brand-solid:#F8FAFF;
+  --ink-on-accent-deep:#04222b;
+  --good:#47CD89; --good-soft:rgba(23,178,106,.16); --good-bd:#085D3A;
+  --warn:#FDB022; --warn-soft:rgba(247,144,9,.16); --warn-bd:#93370D;
+  --bad:#F97066;  --bad-soft:rgba(240,68,56,.16);   --bad-bd:#912018;
+  --post-text:#A5F0FC; --post-bg:rgba(8,138,178,.20); --post-bd:#0E7090;
+  --dm-text:#D6B8FF;   --dm-bg:rgba(120,80,200,.20);  --dm-bd:#40306b;
+  --create-bg:#F8FAFF; --create-text:#0B0C12;
   --shadow:0 14px 40px rgba(0,0,0,.5); --shadow-sm:0 4px 16px rgba(0,0,0,.35);
-  --ring:0 0 0 3px rgba(34,204,238,.32);
+  --ring:0 0 0 3px rgba(6,174,212,.35);
 }
 
 * { box-sizing: border-box; }
@@ -125,7 +130,16 @@ button { font-family: inherit; cursor: pointer; }
   overflow-y: auto;
 }
 .sidebar__inner { display: flex; flex-direction: column; min-height: 100%; padding: 18px 14px 90px; }
-.brand { color: var(--ink-0); padding: 4px 8px 14px; }
+.sidebar__top { display: flex; align-items: center; justify-content: space-between; padding: 0 4px 12px; }
+.brand { color: var(--ink-0); display: flex; align-items: center; }
+.navtoggle {
+  width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--ink-1); display: grid; place-items: center;
+  transition: background .15s, color .15s;
+}
+.navtoggle:hover { background: var(--hover); color: var(--ink-0); }
+.navtoggle__chev { transition: transform .2s; }
+.nav-collapsed .navtoggle__chev { transform: rotate(180deg); }
 .iconrow { display: flex; gap: 6px; padding: 0 4px 14px; flex-wrap: wrap; }
 .iconbtn {
   position: relative; width: 38px; height: 38px; border-radius: 10px;
@@ -249,8 +263,8 @@ button { font-family: inherit; cursor: pointer; }
 
 .btn { border: 1px solid transparent; border-radius: 11px; padding: 9px 15px; font-weight: 600; font-size: 13.5px; transition: transform .08s, background .15s, border-color .15s, opacity .15s; }
 .btn:active { transform: translateY(1px); }
-.btn--primary { background: var(--accent); color: var(--ink-on-accent); }
-.btn--primary:hover { filter: brightness(1.05); }
+.btn--primary { background: var(--brand-solid); color: var(--on-brand-solid); }
+.btn--primary:hover { background: var(--brand-solid-hover); }
 .btn--ghost { background: var(--surface); border-color: var(--border-2); color: var(--ink-0); }
 .btn--ghost:hover { background: var(--hover); }
 .btn--sm { padding: 7px 12px; font-size: 12.5px; border-radius: 9px; }
@@ -282,7 +296,7 @@ button { font-family: inherit; cursor: pointer; }
 /* ===================== LIVESTREAM BANNER ===================== */
 .banner {
   position: relative; overflow: hidden; border-radius: var(--radius);
-  background: linear-gradient(135deg, #4C8FB0 0%, #3E7FA6 45%, #2E6E96 100%);
+  background: linear-gradient(135deg, #088AB2 0%, #0E7090 55%, #155B75 100%);
   min-height: 168px; color: #fff; box-shadow: var(--shadow-sm);
 }
 .banner__glass { position: absolute; inset: 0; background: radial-gradient(120px 120px at 82% 40%, rgba(255,255,255,.18), transparent 70%); }
@@ -411,13 +425,13 @@ button { font-family: inherit; cursor: pointer; }
 .composer__input { flex: 1; background: var(--app); border: 1px solid var(--border-2); color: var(--ink-0); border-radius: 12px; padding: 11px 14px; font-size: 14px; outline: none; transition: border-color .15s, box-shadow .15s; }
 .composer__input:focus { border-color: var(--accent); box-shadow: var(--ring); }
 .composer__input::placeholder { color: var(--ink-2); }
-.composer__send { flex: 0 0 44px; height: 44px; border-radius: 12px; border: none; background: var(--accent); color: var(--ink-on-accent); font-size: 18px; font-weight: 700; transition: filter .15s, transform .08s; }
-.composer__send:hover { filter: brightness(1.05); }
+.composer__send { flex: 0 0 44px; height: 44px; border-radius: 12px; border: none; background: var(--brand-solid); color: var(--on-brand-solid); font-size: 18px; font-weight: 700; transition: background .15s, transform .08s; }
+.composer__send:hover { background: var(--brand-solid-hover); }
 .composer__send:active { transform: scale(.94); }
 
 /* FAB */
-.fab { position: fixed; right: 22px; bottom: 22px; z-index: 65; background: var(--accent); color: var(--ink-on-accent); border: none; border-radius: 999px; padding: 14px 20px; font-weight: 700; font-size: 14px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 8px; }
-.fab:hover { filter: brightness(1.05); }
+.fab { position: fixed; right: 22px; bottom: 22px; z-index: 65; background: var(--brand-solid); color: var(--on-brand-solid); border: none; border-radius: 999px; padding: 14px 20px; font-weight: 700; font-size: 14px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 8px; }
+.fab:hover { background: var(--brand-solid-hover); }
 .fab__spark { font-size: 16px; }
 
 /* ===================== MODAL ===================== */
@@ -452,6 +466,26 @@ button { font-family: inherit; cursor: pointer; }
 .toast__ico { color: var(--accent-text); }
 @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
+/* ===================== COLLAPSED NAV (desktop) ===================== */
+@media (min-width: 861px) {
+  .nav-collapsed .sidebar,
+  .nav-collapsed .sidebar__foot { width: var(--side-w-collapsed); }
+  .nav-collapsed .main { margin-left: var(--side-w-collapsed); }
+  .nav-collapsed .sidebar__top { flex-direction: column; gap: 12px; padding-bottom: 14px; }
+  .nav-collapsed .navgroup__label,
+  .nav-collapsed .navitem span:not(.tag),
+  .nav-collapsed .navitem .tag,
+  .nav-collapsed .btn__label,
+  .nav-collapsed .userswitch .ic-sm { display: none; }
+  .nav-collapsed .navitem { justify-content: center; padding-left: 0; padding-right: 0; }
+  .nav-collapsed .iconrow { flex-direction: column; align-items: center; padding-left: 0; padding-right: 0; }
+  .nav-collapsed .navgroup { align-items: center; }
+  .nav-collapsed .navgroup--smart { width: 100%; }
+  .nav-collapsed .btn--create { padding-left: 0; padding-right: 0; gap: 0; }
+  .nav-collapsed .sidebar__foot { padding: 12px 0; justify-content: center; gap: 6px; flex-wrap: wrap; }
+  .nav-collapsed .userswitch { padding: 4px; }
+}
+
 /* ===================== RESPONSIVE ===================== */
 @media (max-width: 1040px) {
   .whatsnew { grid-template-columns: 1fr; }
@@ -477,19 +511,198 @@ button { font-family: inherit; cursor: pointer; }
 </style>
 </head>
 <body>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>passes · creator copilot</title>
-  <meta name="description" content="Passes creator dashboard with a floating AI copilot that schedules content smartly and builds automated messages." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css" />
-</head>
-<body>
+
+  <script>
+    // set theme + nav state before paint to avoid a flash
+    // (defaults: light theme to match the product, side nav folded)
+    (function () {
+      var theme = "light", nav = "collapsed";
+      try { theme = localStorage.getItem("passes-theme") || "light"; } catch (e) {}
+      try { nav = localStorage.getItem("passes-nav") || "collapsed"; } catch (e) {}
+      var r = document.documentElement;
+      r.setAttribute("data-theme", theme);
+      if (nav === "collapsed") r.classList.add("nav-collapsed");
+    })();
+  </script>
+
+  <!-- ========== LEFT SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__inner">
+      <div class="sidebar__top">
+        <a class="brand" href="#" aria-label="passes home">
+          <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
+            <rect x="14" y="4" width="14" height="14" rx="4" fill="currentColor"/>
+            <circle cx="8" cy="24" r="4" fill="currentColor"/>
+          </svg>
+        </a>
+        <button class="navtoggle" id="navToggle" aria-label="Expand menu" title="Expand / collapse menu">
+          <svg viewBox="0 0 24 24" class="ic ic-sm navtoggle__chev"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+      </div>
+
+      <div class="iconrow">
+        <button class="iconbtn is-active" data-view="home" title="Home" aria-label="Home">
+          <svg viewBox="0 0 24 24" class="ic"><path d="M4 11l8-6 8 6M6 10v9h12v-9"/></svg>
+        </button>
+        <button class="iconbtn" data-soon="Messages" title="Messages" aria-label="Messages">
+          <svg viewBox="0 0 24 24" class="ic"><path d="M5 5h14v10H9l-4 4z"/></svg>
+          <span class="badge">2</span>
+        </button>
+        <button class="iconbtn" data-soon="Notifications" title="Notifications" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" class="ic"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/></svg>
+        </button>
+        <button class="iconbtn" data-soon="Storefront" title="Storefront" aria-label="Storefront">
+          <svg viewBox="0 0 24 24" class="ic"><path d="M4 9l1-4h14l1 4M4 9h16v10H4zM4 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0"/></svg>
+        </button>
+        <button class="iconbtn" data-soon="Settings" title="Settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" class="ic"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
+        </button>
+        <button class="iconbtn iconbtn--theme" id="themeToggle" title="Toggle light / dark" aria-label="Toggle theme">
+          <svg viewBox="0 0 24 24" class="ic ic-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>
+          <svg viewBox="0 0 24 24" class="ic ic-moon"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
+        </button>
+      </div>
+
+      <nav class="navgroup" aria-label="Creator tools">
+        <div class="navgroup__label">Creator Tools</div>
+        <button class="navitem" data-soon="Vault">
+          <svg viewBox="0 0 24 24" class="ic"><path d="M12 16V9m0 0l-3 3m3-3l3 3M6 19a5 5 0 0 1-1-9.9A6 6 0 0 1 17 8a4 4 0 0 1 1 7.9"/></svg>
+          <span>Vault</span>
+        </button>
+        <button class="navitem" data-soon="Lists">
+          <svg viewBox="0 0 24 24" class="ic"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>
+          <span>Lists</span>
+        </button>
+        <button class="navitem" data-view="scheduler">
+          <svg viewBox="0 0 24 24" class="ic"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 9h16M8 3v4M16 3v4M12 12v5M9.5 14.5h5"/></svg>
+          <span>Scheduler</span>
+        </button>
+        <button class="navitem" data-soon="Livestream">
+          <svg viewBox="0 0 24 24" class="ic"><circle cx="12" cy="12" r="3"/><path d="M6 6a8 8 0 0 0 0 12M18 6a8 8 0 0 1 0 12"/></svg>
+          <span>Start Livestream</span>
+          <span class="tag">Updated</span>
+        </button>
+        <button class="navitem" data-soon="Post Categories">
+          <svg viewBox="0 0 24 24" class="ic"><path d="M9 4L5 11h8zM17.5 15a3.5 3.5 0 1 0 0 .01M4 14h6v6H4z"/></svg>
+          <span>Post Categories</span>
+        </button>
+        <button class="navitem" data-soon="Manage Memberships">
+          <svg viewBox="0 0 24 24" class="ic"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 6a3 3 0 0 1 0 6M18 14a6 6 0 0 1 3 6"/></svg>
+          <span>Manage Memberships</span>
+        </button>
+        <button class="navitem" data-soon="Integrations">
+          <svg viewBox="0 0 24 24" class="ic"><path d="M10 4h4v3a2 2 0 0 0 4 0V4h2v6h-3a2 2 0 0 0 0 4h3v6h-6v-3a2 2 0 0 0-4 0v3H4v-6h3a2 2 0 0 0 0-4H4V4z"/></svg>
+          <span>Integrations</span>
+        </button>
+      </nav>
+
+      <div class="navgroup navgroup--smart" aria-label="Smart tools">
+        <div class="navgroup__label">Smart Tools</div>
+        <button class="navitem" data-view="scheduler">
+          <svg viewBox="0 0 24 24" class="ic"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 9h16M8 3v4M16 3v4"/><path d="M15 13l.7 1.6L17.3 15l-1.6.7L15 17.3l-.7-1.6L12.7 15l1.6-.7z" fill="currentColor" stroke="none"/></svg>
+          <span>Smart Scheduler</span>
+        </button>
+        <button class="navitem" data-view="automations">
+          <svg viewBox="0 0 24 24" class="ic"><rect x="4" y="6" width="16" height="11" rx="2"/><path d="M8 17l-2 3M9 11h.01M15 11h.01M12 3v3"/></svg>
+          <span>Automated Messages</span>
+        </button>
+      </div>
+
+      <div class="sidebar__foot">
+        <button class="userswitch" data-soon="Switch account">
+          <span class="userswitch__avatar">🐵</span>
+          <svg viewBox="0 0 24 24" class="ic ic-sm"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>
+        </button>
+        <button class="btn btn--create" data-soon="Create" title="Create">
+          <svg viewBox="0 0 24 24" class="ic ic-sm"><path d="M12 5v14M5 12h14"/></svg>
+          <span class="btn__label">Create</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <button class="menubtn" id="menuBtn" aria-label="Open menu" hidden>☰</button>
+  <div class="sidebar__scrim" id="sidebarScrim" hidden></div>
+
+  <!-- ========== MAIN ========== -->
+  <main class="main" id="main">
+    <div class="wrap">
+      <header class="mainhead" id="mainHead"></header>
+
+      <section class="stats" id="statsRow" aria-label="Key metrics"></section>
+
+      <!-- HOME VIEW -->
+      <section class="view is-active" data-view="home" id="view-home">
+        <div class="home">
+          <!-- centered copilot slot -->
+          <div class="copilot-slot" id="homeCopilotSlot"></div>
+          <!-- what's new / notifications -->
+          <div class="whatsnew">
+            <div class="banner" role="img" aria-label="New livestream experience">
+              <div class="banner__glass"></div>
+              <div class="banner__content">
+                <span class="banner__tag">NEW</span>
+                <div class="banner__title">Your new<br/>livestream<br/>experience</div>
+              </div>
+              <svg class="banner__cam" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="12" height="10" rx="2" fill="currentColor"/><path d="M15 10l6-3v10l-6-3z" fill="currentColor"/></svg>
+              <span class="banner__c banner__c1"></span>
+              <span class="banner__c banner__c2"></span>
+              <span class="banner__c banner__c3"></span>
+            </div>
+            <div class="card notif">
+              <div class="card__head"><h3 class="card__title">What's new for you</h3></div>
+              <div id="tipsList" class="actionlist"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCHEDULER VIEW -->
+      <section class="view" data-view="scheduler" id="view-scheduler"></section>
+
+      <!-- AUTOMATIONS VIEW -->
+      <section class="view" data-view="automations" id="view-automations"></section>
+    </div>
+  </main>
+
+  <!-- ========== COPILOT (reparented between home slot & floating dock) ========== -->
+  <div class="copilot" id="copilot">
+    <div class="copilot__head">
+      <div class="copilot__id">
+        <span class="copilot__dot" aria-hidden="true"></span>
+        <div>
+          <div class="copilot__name">Copilot</div>
+          <div class="copilot__status">Schedule posts &amp; DMs, on autopilot</div>
+        </div>
+      </div>
+      <button class="iconbtn copilot__min" id="copilotMin" aria-label="Minimize copilot" title="Minimize">–</button>
+    </div>
+    <div class="chat" id="chatLog" aria-live="polite"></div>
+    <div class="chat__suggest" id="chatSuggest"></div>
+    <form class="composer" id="composer" autocomplete="off">
+      <input class="composer__input" id="chatInput" type="text"
+             placeholder="Try: schedule a post tomorrow at the best time" aria-label="Message your copilot" />
+      <button class="composer__send" type="submit" aria-label="Send">↑</button>
+    </form>
+  </div>
+
+  <!-- floating dock (holds copilot on non-home pages) -->
+  <div class="floatdock" id="floatDock"></div>
+  <button class="fab" id="copilotFab" hidden aria-label="Open copilot">
+    <span class="fab__spark" aria-hidden="true">✦</span>
+    <span class="fab__label">Copilot</span>
+  </button>
+
+  <!-- MODAL HOST -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal__backdrop" data-close-modal></div>
+    <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="modalTitle" id="modalCard"></div>
+  </div>
+
+  <!-- TOASTS -->
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+
 <script>
 /* ============================================================
    data.js — mock data + shared state for the prototype
@@ -2137,7 +2350,25 @@ button { font-family: inherit; cursor: pointer; }
     });
   }
 
-  /* ---------------- SIDEBAR (mobile) ---------------- */
+  /* ---------------- SIDEBAR (collapse + mobile) ---------------- */
+  function initNav() {
+    // tooltips for the collapsed (icon-only) state
+    els.sidebar.querySelectorAll(".navitem").forEach(function (n) {
+      var span = n.querySelector("span:not(.tag)");
+      if (span && !n.title) n.title = span.textContent;
+    });
+    var toggle = document.getElementById("navToggle");
+    function syncLabel() {
+      var collapsed = document.documentElement.classList.contains("nav-collapsed");
+      toggle.setAttribute("aria-label", collapsed ? "Expand menu" : "Collapse menu");
+    }
+    syncLabel();
+    toggle.addEventListener("click", function () {
+      var collapsed = document.documentElement.classList.toggle("nav-collapsed");
+      try { localStorage.setItem("passes-nav", collapsed ? "collapsed" : "expanded"); } catch (e) {}
+      syncLabel();
+    });
+  }
   function openSidebar() { els.sidebar.classList.add("is-open"); els.scrim.hidden = false; }
   function closeSidebar() { els.sidebar.classList.remove("is-open"); els.scrim.hidden = true; }
 
@@ -2429,6 +2660,7 @@ button { font-family: inherit; cursor: pointer; }
     els.scrim.addEventListener("click", closeSidebar);
 
     initTheme();
+    initNav();
     renderTips();
     switchView("home");     // places copilot in the hero slot + renders header/stats
     window.Chatbot.init();

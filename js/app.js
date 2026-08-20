@@ -158,7 +158,25 @@
     });
   }
 
-  /* ---------------- SIDEBAR (mobile) ---------------- */
+  /* ---------------- SIDEBAR (collapse + mobile) ---------------- */
+  function initNav() {
+    // tooltips for the collapsed (icon-only) state
+    els.sidebar.querySelectorAll(".navitem").forEach(function (n) {
+      var span = n.querySelector("span:not(.tag)");
+      if (span && !n.title) n.title = span.textContent;
+    });
+    var toggle = document.getElementById("navToggle");
+    function syncLabel() {
+      var collapsed = document.documentElement.classList.contains("nav-collapsed");
+      toggle.setAttribute("aria-label", collapsed ? "Expand menu" : "Collapse menu");
+    }
+    syncLabel();
+    toggle.addEventListener("click", function () {
+      var collapsed = document.documentElement.classList.toggle("nav-collapsed");
+      try { localStorage.setItem("passes-nav", collapsed ? "collapsed" : "expanded"); } catch (e) {}
+      syncLabel();
+    });
+  }
   function openSidebar() { els.sidebar.classList.add("is-open"); els.scrim.hidden = false; }
   function closeSidebar() { els.sidebar.classList.remove("is-open"); els.scrim.hidden = true; }
 
@@ -450,6 +468,7 @@
     els.scrim.addEventListener("click", closeSidebar);
 
     initTheme();
+    initNav();
     renderTips();
     switchView("home");     // places copilot in the hero slot + renders header/stats
     window.Chatbot.init();
