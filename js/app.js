@@ -110,20 +110,11 @@
     // 1 — low content supply
     html += aitemRow("warn", "📦", "Low content supply", "No vault uploads in 7 days.", "upload", "Upload");
 
-    // 2 — reuse top DMs with a new audience
-    html += '<div class="aitem aitem--block">' +
-      '<div class="aitem__blockhead"><div class="aitem__icon">🔁</div>' +
-      '<div class="aitem__body"><div class="aitem__title">Reuse top DMs with a new audience</div>' +
-      '<div class="aitem__desc">Your best performers, ready to resend.</div></div></div>' +
-      '<div class="dmreuse">';
-    D.topDMs.forEach(function (d, i) {
-      html += '<div class="dmrow"><span class="dmrow__thumb">' + d.emoji + '</span>' +
-        '<div class="dmrow__body"><div class="dmrow__text">' + S.esc(d.text) + '</div>' +
-        '<div class="dmrow__meta">Last used ' + d.lastUsed + '</div></div>' +
-        '<div class="dmrow__conv">' + d.conv + '% conv.</div>' +
-        '<button class="dmrow__btn" data-reuse="' + i + '" title="Reuse with a new audience">⟳</button></div>';
-    });
-    html += '</div></div>';
+    // 2 — reuse a top DM with a new audience (single row, same structure as the rest)
+    var top = D.topDMs[0];
+    html += aitemRow("brand", "🔁", "Reuse a top DM with a new audience",
+      '“' + S.esc(trim(top.text, 42)) + '” hit ' + top.conv + '% conv. Resend to a fresh list.',
+      "reuse", "Reuse");
 
     // 3 — queue running low
     html += aitemRow("warn", "🗓️", "Keep your queue full",
@@ -144,16 +135,11 @@
     html += '</div>';
     els.actionItems.innerHTML = html;
 
-    els.actionItems.querySelectorAll("[data-reuse]").forEach(function (b) {
-      b.addEventListener("click", function () {
-        var d = D.topDMs[parseInt(b.getAttribute("data-reuse"), 10)];
-        window.SchedulerUI.openScheduleModal(null, { kind: "dm", text: d.text, audience: "new" });
-      });
-    });
     els.actionItems.querySelectorAll("[data-act]").forEach(function (b) {
       var act = b.getAttribute("data-act");
       b.addEventListener("click", function () {
         if (act === "upload") toast("Vault upload is not part of this prototype");
+        else if (act === "reuse") window.SchedulerUI.openScheduleModal(null, { kind: "dm", text: D.topDMs[0].text, audience: "new" });
         else if (act === "schedule") window.SchedulerUI.openScheduleModal();
         else if (act === "whale") window.SchedulerUI.openScheduleModal(null, {
           kind: "dm", audience: "vip",

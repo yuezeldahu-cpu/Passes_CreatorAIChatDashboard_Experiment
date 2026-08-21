@@ -143,20 +143,22 @@
       <section class="view is-active" data-view="overview" id="view-overview">
         <div class="overview">
           <div class="card" id="actionItems"></div>
-          <div class="card" id="upNextCard"></div>
-          <div class="card notif">
-            <div class="card__head"><h3 class="card__title">What's new for you</h3></div>
-            <div class="banner" role="img" aria-label="New livestream experience">
-              <div class="banner__glass"></div>
-              <div class="banner__content">
-                <span class="banner__tag">NEW</span>
-                <div class="banner__title">Your new livestream experience</div>
+          <div class="overview__right">
+            <div class="card notif">
+              <div class="card__head"><h3 class="card__title">What's new for you</h3></div>
+              <div class="banner" role="img" aria-label="New livestream experience">
+                <div class="banner__glass"></div>
+                <div class="banner__content">
+                  <span class="banner__tag">NEW</span>
+                  <div class="banner__title">Your new livestream experience</div>
+                </div>
+                <svg class="banner__cam" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="12" height="10" rx="2" fill="currentColor"/><path d="M15 10l6-3v10l-6-3z" fill="currentColor"/></svg>
+                <span class="banner__c banner__c1"></span>
+                <span class="banner__c banner__c2"></span>
               </div>
-              <svg class="banner__cam" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="12" height="10" rx="2" fill="currentColor"/><path d="M15 10l6-3v10l-6-3z" fill="currentColor"/></svg>
-              <span class="banner__c banner__c1"></span>
-              <span class="banner__c banner__c2"></span>
+              <div id="tipsList" class="actionlist"></div>
             </div>
-            <div id="tipsList" class="actionlist"></div>
+            <div class="card" id="upNextCard"></div>
           </div>
         </div>
       </section>

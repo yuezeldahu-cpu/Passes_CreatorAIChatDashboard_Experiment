@@ -258,8 +258,9 @@ button { font-family: inherit; cursor: pointer; }
 .view.is-active { display: block; }
 @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
-/* OVERVIEW layout: Action items | Up next (wider) | What's new, on desktop */
-.overview { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+/* OVERVIEW layout: Action items (left) | right column with What's new over Up next */
+.overview { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.overview__right { display: flex; flex-direction: column; gap: 16px; }
 .notif .banner { margin-bottom: 14px; }
 .notif .actionlist { margin-top: 0; }
 
@@ -273,19 +274,6 @@ button { font-family: inherit; cursor: pointer; }
 .aitem__title { font-weight: 600; font-size: 13.5px; }
 .aitem__desc { color: var(--ink-1); font-size: 12.5px; margin-top: 2px; }
 .aitem__cta { flex-shrink: 0; align-self: center; }
-
-/* reuse-top-DMs block */
-.aitem--block { flex-direction: column; gap: 8px; }
-.aitem__blockhead { display: flex; align-items: center; gap: 11px; width: 100%; }
-.dmreuse { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-.dmrow { display: grid; grid-template-columns: 34px 1fr auto auto; gap: 9px; align-items: center; background: var(--raise); border: 1px solid var(--line); border-radius: 10px; padding: 8px 9px; }
-.dmrow__thumb { width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; font-size: 16px; background: var(--hover); }
-.dmrow__body { min-width: 0; }
-.dmrow__text { font-size: 12.5px; color: var(--ink-0); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dmrow__meta { font-size: 11px; color: var(--ink-2); margin-top: 1px; }
-.dmrow__conv { font-size: 12px; font-weight: 700; color: var(--accent-text); font-variant-numeric: tabular-nums; }
-.dmrow__btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border-2); background: var(--surface); color: var(--ink-1); display: grid; place-items: center; font-size: 15px; }
-.dmrow__btn:hover { background: var(--hover); color: var(--accent-text); border-color: var(--post-bd); }
 
 /* ===================== CARDS / GENERIC ===================== */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow-sm); }
@@ -675,20 +663,22 @@ button { font-family: inherit; cursor: pointer; }
       <section class="view is-active" data-view="overview" id="view-overview">
         <div class="overview">
           <div class="card" id="actionItems"></div>
-          <div class="card" id="upNextCard"></div>
-          <div class="card notif">
-            <div class="card__head"><h3 class="card__title">What's new for you</h3></div>
-            <div class="banner" role="img" aria-label="New livestream experience">
-              <div class="banner__glass"></div>
-              <div class="banner__content">
-                <span class="banner__tag">NEW</span>
-                <div class="banner__title">Your new livestream experience</div>
+          <div class="overview__right">
+            <div class="card notif">
+              <div class="card__head"><h3 class="card__title">What's new for you</h3></div>
+              <div class="banner" role="img" aria-label="New livestream experience">
+                <div class="banner__glass"></div>
+                <div class="banner__content">
+                  <span class="banner__tag">NEW</span>
+                  <div class="banner__title">Your new livestream experience</div>
+                </div>
+                <svg class="banner__cam" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="12" height="10" rx="2" fill="currentColor"/><path d="M15 10l6-3v10l-6-3z" fill="currentColor"/></svg>
+                <span class="banner__c banner__c1"></span>
+                <span class="banner__c banner__c2"></span>
               </div>
-              <svg class="banner__cam" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="12" height="10" rx="2" fill="currentColor"/><path d="M15 10l6-3v10l-6-3z" fill="currentColor"/></svg>
-              <span class="banner__c banner__c1"></span>
-              <span class="banner__c banner__c2"></span>
+              <div id="tipsList" class="actionlist"></div>
             </div>
-            <div id="tipsList" class="actionlist"></div>
+            <div class="card" id="upNextCard"></div>
           </div>
         </div>
       </section>
@@ -2348,20 +2338,11 @@ button { font-family: inherit; cursor: pointer; }
     // 1 — low content supply
     html += aitemRow("warn", "📦", "Low content supply", "No vault uploads in 7 days.", "upload", "Upload");
 
-    // 2 — reuse top DMs with a new audience
-    html += '<div class="aitem aitem--block">' +
-      '<div class="aitem__blockhead"><div class="aitem__icon">🔁</div>' +
-      '<div class="aitem__body"><div class="aitem__title">Reuse top DMs with a new audience</div>' +
-      '<div class="aitem__desc">Your best performers, ready to resend.</div></div></div>' +
-      '<div class="dmreuse">';
-    D.topDMs.forEach(function (d, i) {
-      html += '<div class="dmrow"><span class="dmrow__thumb">' + d.emoji + '</span>' +
-        '<div class="dmrow__body"><div class="dmrow__text">' + S.esc(d.text) + '</div>' +
-        '<div class="dmrow__meta">Last used ' + d.lastUsed + '</div></div>' +
-        '<div class="dmrow__conv">' + d.conv + '% conv.</div>' +
-        '<button class="dmrow__btn" data-reuse="' + i + '" title="Reuse with a new audience">⟳</button></div>';
-    });
-    html += '</div></div>';
+    // 2 — reuse a top DM with a new audience (single row, same structure as the rest)
+    var top = D.topDMs[0];
+    html += aitemRow("brand", "🔁", "Reuse a top DM with a new audience",
+      '“' + S.esc(trim(top.text, 42)) + '” hit ' + top.conv + '% conv. Resend to a fresh list.',
+      "reuse", "Reuse");
 
     // 3 — queue running low
     html += aitemRow("warn", "🗓️", "Keep your queue full",
@@ -2382,16 +2363,11 @@ button { font-family: inherit; cursor: pointer; }
     html += '</div>';
     els.actionItems.innerHTML = html;
 
-    els.actionItems.querySelectorAll("[data-reuse]").forEach(function (b) {
-      b.addEventListener("click", function () {
-        var d = D.topDMs[parseInt(b.getAttribute("data-reuse"), 10)];
-        window.SchedulerUI.openScheduleModal(null, { kind: "dm", text: d.text, audience: "new" });
-      });
-    });
     els.actionItems.querySelectorAll("[data-act]").forEach(function (b) {
       var act = b.getAttribute("data-act");
       b.addEventListener("click", function () {
         if (act === "upload") toast("Vault upload is not part of this prototype");
+        else if (act === "reuse") window.SchedulerUI.openScheduleModal(null, { kind: "dm", text: D.topDMs[0].text, audience: "new" });
         else if (act === "schedule") window.SchedulerUI.openScheduleModal();
         else if (act === "whale") window.SchedulerUI.openScheduleModal(null, {
           kind: "dm", audience: "vip",
