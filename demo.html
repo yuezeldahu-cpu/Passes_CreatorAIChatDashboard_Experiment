@@ -258,10 +258,22 @@ button { font-family: inherit; cursor: pointer; }
 .view.is-active { display: block; }
 @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
-/* OVERVIEW layout: "What's new" (banner first) beside "Up next" on desktop */
-.overview { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+/* OVERVIEW layout: Action items (left) | right column with What's new over Up next */
+.overview { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.overview__right { display: flex; flex-direction: column; gap: 16px; }
 .notif .banner { margin-bottom: 14px; }
 .notif .actionlist { margin-top: 0; }
+
+/* action items */
+.aitem { display: flex; gap: 11px; align-items: flex-start; padding: 11px 0; border-top: 1px solid var(--line); }
+.aitem:first-child { border-top: none; padding-top: 2px; }
+.aitem__icon { flex: 0 0 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font-size: 15px; background: var(--accent-soft); }
+.aitem__icon--warn { background: var(--warn-soft); }
+.aitem__icon--bad { background: var(--bad-soft); }
+.aitem__body { flex: 1; min-width: 0; }
+.aitem__title { font-weight: 600; font-size: 13.5px; }
+.aitem__desc { color: var(--ink-1); font-size: 12.5px; margin-top: 2px; }
+.aitem__cta { flex-shrink: 0; align-self: center; }
 
 /* ===================== CARDS / GENERIC ===================== */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow-sm); }
@@ -303,19 +315,19 @@ button { font-family: inherit; cursor: pointer; }
 
 /* ===================== LIVESTREAM BANNER ===================== */
 .banner {
-  position: relative; overflow: hidden; border-radius: var(--radius);
+  position: relative; overflow: hidden; border-radius: var(--radius-sm);
   background: linear-gradient(135deg, #088AB2 0%, #0E7090 55%, #155B75 100%);
-  min-height: 168px; color: #fff; box-shadow: var(--shadow-sm);
+  min-height: 84px; color: #fff; box-shadow: var(--shadow-sm);
+  display: flex; align-items: center;
 }
-.banner__glass { position: absolute; inset: 0; background: radial-gradient(120px 120px at 82% 40%, rgba(255,255,255,.18), transparent 70%); }
-.banner__content { position: relative; z-index: 2; padding: 18px 18px 20px; }
-.banner__tag { display: inline-block; background: rgba(255,255,255,.22); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .5px; padding: 4px 10px; border-radius: 999px; margin-bottom: 12px; }
-.banner__title { font-family: var(--font-display); font-weight: 700; font-size: 21px; line-height: 1.12; text-transform: uppercase; letter-spacing: .3px; text-shadow: 0 1px 8px rgba(0,0,0,.12); }
-.banner__cam { position: absolute; right: 18px; bottom: 18px; width: 58px; height: 58px; color: rgba(255,255,255,.95); z-index: 2; }
+.banner__glass { position: absolute; inset: 0; background: radial-gradient(90px 90px at 84% 40%, rgba(255,255,255,.18), transparent 70%); }
+.banner__content { position: relative; z-index: 2; padding: 12px 14px; }
+.banner__tag { display: inline-block; background: rgba(255,255,255,.22); color: #fff; font-size: 9.5px; font-weight: 700; letter-spacing: .5px; padding: 2px 8px; border-radius: 999px; margin-bottom: 6px; }
+.banner__title { font-family: var(--font-display); font-weight: 700; font-size: 14px; line-height: 1.15; text-transform: uppercase; letter-spacing: .3px; max-width: 72%; text-shadow: 0 1px 8px rgba(0,0,0,.12); }
+.banner__cam { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; color: rgba(255,255,255,.95); z-index: 2; }
 .banner__c { position: absolute; border-radius: 50%; background: rgba(255,255,255,.10); z-index: 1; }
-.banner__c1 { width: 130px; height: 130px; right: -20px; bottom: -30px; }
-.banner__c2 { width: 70px; height: 70px; right: 60px; top: -20px; background: rgba(255,255,255,.08); }
-.banner__c3 { width: 16px; height: 16px; right: 30px; top: 26px; background: rgba(255,255,255,.5); border-radius: 5px; }
+.banner__c1 { width: 80px; height: 80px; right: -16px; bottom: -30px; }
+.banner__c2 { width: 42px; height: 42px; right: 44px; top: -18px; background: rgba(255,255,255,.08); }
 
 /* ===================== QUEUE (scheduler) ===================== */
 .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -492,8 +504,10 @@ button { font-family: inherit; cursor: pointer; }
   .main { margin-right: 0; }
   .copilot { box-shadow: var(--shadow); }
 }
-@media (max-width: 1040px) {
+@media (max-width: 1240px) {
   .overview { grid-template-columns: 1fr; }
+}
+@media (max-width: 1040px) {
   .stats { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 860px) {
@@ -648,22 +662,24 @@ button { font-family: inherit; cursor: pointer; }
       <!-- OVERVIEW -->
       <section class="view is-active" data-view="overview" id="view-overview">
         <div class="overview">
-          <div class="card notif">
-            <div class="card__head"><h3 class="card__title">What's new for you</h3></div>
-            <div class="banner" role="img" aria-label="New livestream experience">
-              <div class="banner__glass"></div>
-              <div class="banner__content">
-                <span class="banner__tag">NEW</span>
-                <div class="banner__title">Your new<br/>livestream<br/>experience</div>
+          <div class="card" id="actionItems"></div>
+          <div class="overview__right">
+            <div class="card notif">
+              <div class="card__head"><h3 class="card__title">What's new for you</h3></div>
+              <div class="banner" role="img" aria-label="New livestream experience">
+                <div class="banner__glass"></div>
+                <div class="banner__content">
+                  <span class="banner__tag">NEW</span>
+                  <div class="banner__title">Your new livestream experience</div>
+                </div>
+                <svg class="banner__cam" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="12" height="10" rx="2" fill="currentColor"/><path d="M15 10l6-3v10l-6-3z" fill="currentColor"/></svg>
+                <span class="banner__c banner__c1"></span>
+                <span class="banner__c banner__c2"></span>
               </div>
-              <svg class="banner__cam" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="12" height="10" rx="2" fill="currentColor"/><path d="M15 10l6-3v10l-6-3z" fill="currentColor"/></svg>
-              <span class="banner__c banner__c1"></span>
-              <span class="banner__c banner__c2"></span>
-              <span class="banner__c banner__c3"></span>
+              <div id="tipsList" class="actionlist"></div>
             </div>
-            <div id="tipsList" class="actionlist"></div>
+            <div class="card" id="upNextCard"></div>
           </div>
-          <div class="card" id="upNextCard"></div>
         </div>
       </section>
 
@@ -896,6 +912,15 @@ button { font-family: inherit; cursor: pointer; }
     }
   ];
 
+  /* --- Action items: top DMs to reuse + retention watch --- */
+  var topDMs = [
+    { emoji: "💋", text: "unlocked something special just for you 👀", lastUsed: "Jul 10, 2025", conv: 75 },
+    { emoji: "🔥", text: "my favorite set yet... you in? 🙈", lastUsed: "Jul 10, 2025", conv: 67 },
+    { emoji: "🎁", text: "lil gift inside, don't tell anyone 🤫", lastUsed: "Mar 24, 2026", conv: 14 }
+  ];
+  var whale = { name: "Jordan M.", days: 12, spend: "$2,410" };
+  var retention = { cancelled: 3, expiringSoon: 7 };
+
   /* --- Seed: automation flows ----------------------------- */
   var automations = [
     {
@@ -971,6 +996,9 @@ button { font-family: inherit; cursor: pointer; }
     bestWindows: bestWindows,
     bestHourForDay: bestHourForDay,
     segments: segments,
+    topDMs: topDMs,
+    whale: whale,
+    retention: retention,
     STAT_LABELS: STAT_LABELS,
     RANGES: RANGES,
     rangeStats: rangeStats,
@@ -2259,7 +2287,6 @@ button { font-family: inherit; cursor: pointer; }
     var w = D.bestWindows(1)[0];
     var peak = D.DAYS[w.day] + " " + D.fmtHour(w.hour);
     var tips = [
-      { icon: "✦", title: "Ask your copilot anything", desc: "It schedules posts and mass DMs, prices them, and builds automations from a sentence." },
       { icon: "🕒", title: "Your fans peak at " + peak, desc: "Schedule your next drop then for the biggest reach." },
       { icon: "🔁", title: A.activeCount() + " automations running", desc: "New subscribers and win-backs are handled for you on autopilot." }
     ];
@@ -2292,7 +2319,65 @@ button { font-family: inherit; cursor: pointer; }
     if (b) b.addEventListener("click", function () { switchView("scheduler"); });
   }
 
-  function renderOverview() { renderTips(); renderUpNext(); }
+  /* ---------------- ACTION ITEMS ---------------- */
+  function aitemRow(sev, icon, title, desc, act, btn) {
+    return '<div class="aitem"><div class="aitem__icon aitem__icon--' + sev + '">' + icon + '</div>' +
+      '<div class="aitem__body"><div class="aitem__title">' + title + '</div>' +
+      '<div class="aitem__desc">' + desc + '</div></div>' +
+      '<button class="btn btn--ghost btn--sm aitem__cta" data-act="' + act + '">' + btn + '</button></div>';
+  }
+
+  function renderActionItems() {
+    var now = new Date(), in3 = new Date(); in3.setDate(in3.getDate() + 3);
+    var soon = D.queue.filter(function (q) { return q.status === "scheduled" && q.when >= now && q.when <= in3; }).length;
+
+    var html = '<div class="card__head"><h3 class="card__title">Action items</h3><span class="pill">5</span></div>';
+    html += '<div class="actionlist" style="gap:0">';
+
+    // 1 — low content supply
+    html += aitemRow("warn", "📦", "Low content supply", "No vault uploads in 7 days.", "upload", "Upload");
+
+    // 2 — reuse a top DM with a new audience (single row, same structure as the rest)
+    var top = D.topDMs[0];
+    html += aitemRow("brand", "🔁", "Reuse a top DM with a new audience",
+      '“' + S.esc(trim(top.text, 42)) + '” hit ' + top.conv + '% conv. Resend to a fresh list.',
+      "reuse", "Reuse");
+
+    // 3 — queue running low
+    html += aitemRow("warn", "🗓️", "Keep your queue full",
+      soon ? (soon + " scheduled in the next 3 days. Add more to stay consistent.")
+           : "Nothing scheduled in the next 3 days.",
+      "schedule", "Schedule");
+
+    // 4 — whale going quiet
+    html += aitemRow("bad", "🐳", "Big fan going quiet",
+      D.whale.name + " (" + D.whale.spend + " lifetime) hasn't chatted in " + D.whale.days + " days.",
+      "whale", "Message");
+
+    // 5 — retention watch
+    html += aitemRow("bad", "🚩", "Watch: fans slipping away",
+      D.retention.cancelled + " memberships cancelled this week · " + D.retention.expiringSoon + " expiring soon.",
+      "retention", "Review");
+
+    html += '</div>';
+    els.actionItems.innerHTML = html;
+
+    els.actionItems.querySelectorAll("[data-act]").forEach(function (b) {
+      var act = b.getAttribute("data-act");
+      b.addEventListener("click", function () {
+        if (act === "upload") toast("Vault upload is not part of this prototype");
+        else if (act === "reuse") window.SchedulerUI.openScheduleModal(null, { kind: "dm", text: D.topDMs[0].text, audience: "new" });
+        else if (act === "schedule") window.SchedulerUI.openScheduleModal();
+        else if (act === "whale") window.SchedulerUI.openScheduleModal(null, {
+          kind: "dm", audience: "vip",
+          text: "hey " + D.whale.name.split(" ")[0] + " 🥺 missing you in here. sent you something 👀"
+        });
+        else if (act === "retention") { switchView("automations"); toast("Set up a win-back automation to catch these"); }
+      });
+    });
+  }
+
+  function renderOverview() { renderActionItems(); renderUpNext(); renderTips(); }
 
   /* ---------------- VIEW SWITCHING (tabs + nav) ---------------- */
   function switchView(view) {
@@ -2395,14 +2480,15 @@ button { font-family: inherit; cursor: pointer; }
   var mediaState = [];
 
   window.SchedulerUI = {
-    openScheduleModal: function (editId) {
+    openScheduleModal: function (editId, prefill) {
       var item = editId ? D.queue.filter(function (q) { return q.id === editId; })[0] : null;
       var isEdit = !!item;
-      var kind = item ? item.kind : "post";
+      var pf = (!item && prefill) ? prefill : {};
+      var kind = item ? item.kind : (pf.kind || "post");
       var whenVal = item ? toLocalInput(item.when) : toLocalInput(S.suggestTime({}));
-      var audience = item ? item.audience : "all";
-      var price = item ? item.price : 0;
-      var text = item ? item.text : "";
+      var audience = item ? item.audience : (pf.audience || "all");
+      var price = item ? item.price : (pf.price || 0);
+      var text = item ? item.text : (pf.text || "");
       mediaState = item && item.media ? item.media.slice() : [];
 
       var segOpts = D.segments.map(function (s) {
@@ -2628,6 +2714,7 @@ button { font-family: inherit; cursor: pointer; }
     els.stats = document.getElementById("statsRow");
     els.tips = document.getElementById("tipsList");
     els.upNext = document.getElementById("upNextCard");
+    els.actionItems = document.getElementById("actionItems");
     els.views = {
       scheduler: document.getElementById("view-scheduler"),
       automations: document.getElementById("view-automations")

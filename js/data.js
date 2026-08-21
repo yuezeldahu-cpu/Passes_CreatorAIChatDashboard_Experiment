@@ -182,6 +182,15 @@
     }
   ];
 
+  /* --- Action items: top DMs to reuse + retention watch --- */
+  var topDMs = [
+    { emoji: "💋", text: "unlocked something special just for you 👀", lastUsed: "Jul 10, 2025", conv: 75 },
+    { emoji: "🔥", text: "my favorite set yet... you in? 🙈", lastUsed: "Jul 10, 2025", conv: 67 },
+    { emoji: "🎁", text: "lil gift inside, don't tell anyone 🤫", lastUsed: "Mar 24, 2026", conv: 14 }
+  ];
+  var whale = { name: "Jordan M.", days: 12, spend: "$2,410" };
+  var retention = { cancelled: 3, expiringSoon: 7 };
+
   /* --- Seed: automation flows ----------------------------- */
   var automations = [
     {
@@ -257,6 +266,9 @@
     bestWindows: bestWindows,
     bestHourForDay: bestHourForDay,
     segments: segments,
+    topDMs: topDMs,
+    whale: whale,
+    retention: retention,
     STAT_LABELS: STAT_LABELS,
     RANGES: RANGES,
     rangeStats: rangeStats,

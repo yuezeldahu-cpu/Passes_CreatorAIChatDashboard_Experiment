@@ -59,7 +59,6 @@
     var w = D.bestWindows(1)[0];
     var peak = D.DAYS[w.day] + " " + D.fmtHour(w.hour);
     var tips = [
-      { icon: "✦", title: "Ask your copilot anything", desc: "It schedules posts and mass DMs, prices them, and builds automations from a sentence." },
       { icon: "🕒", title: "Your fans peak at " + peak, desc: "Schedule your next drop then for the biggest reach." },
       { icon: "🔁", title: A.activeCount() + " automations running", desc: "New subscribers and win-backs are handled for you on autopilot." }
     ];
@@ -92,7 +91,65 @@
     if (b) b.addEventListener("click", function () { switchView("scheduler"); });
   }
 
-  function renderOverview() { renderTips(); renderUpNext(); }
+  /* ---------------- ACTION ITEMS ---------------- */
+  function aitemRow(sev, icon, title, desc, act, btn) {
+    return '<div class="aitem"><div class="aitem__icon aitem__icon--' + sev + '">' + icon + '</div>' +
+      '<div class="aitem__body"><div class="aitem__title">' + title + '</div>' +
+      '<div class="aitem__desc">' + desc + '</div></div>' +
+      '<button class="btn btn--ghost btn--sm aitem__cta" data-act="' + act + '">' + btn + '</button></div>';
+  }
+
+  function renderActionItems() {
+    var now = new Date(), in3 = new Date(); in3.setDate(in3.getDate() + 3);
+    var soon = D.queue.filter(function (q) { return q.status === "scheduled" && q.when >= now && q.when <= in3; }).length;
+
+    var html = '<div class="card__head"><h3 class="card__title">Action items</h3><span class="pill">5</span></div>';
+    html += '<div class="actionlist" style="gap:0">';
+
+    // 1 — low content supply
+    html += aitemRow("warn", "📦", "Low content supply", "No vault uploads in 7 days.", "upload", "Upload");
+
+    // 2 — reuse a top DM with a new audience (single row, same structure as the rest)
+    var top = D.topDMs[0];
+    html += aitemRow("brand", "🔁", "Reuse a top DM with a new audience",
+      '“' + S.esc(trim(top.text, 42)) + '” hit ' + top.conv + '% conv. Resend to a fresh list.',
+      "reuse", "Reuse");
+
+    // 3 — queue running low
+    html += aitemRow("warn", "🗓️", "Keep your queue full",
+      soon ? (soon + " scheduled in the next 3 days. Add more to stay consistent.")
+           : "Nothing scheduled in the next 3 days.",
+      "schedule", "Schedule");
+
+    // 4 — whale going quiet
+    html += aitemRow("bad", "🐳", "Big fan going quiet",
+      D.whale.name + " (" + D.whale.spend + " lifetime) hasn't chatted in " + D.whale.days + " days.",
+      "whale", "Message");
+
+    // 5 — retention watch
+    html += aitemRow("bad", "🚩", "Watch: fans slipping away",
+      D.retention.cancelled + " memberships cancelled this week · " + D.retention.expiringSoon + " expiring soon.",
+      "retention", "Review");
+
+    html += '</div>';
+    els.actionItems.innerHTML = html;
+
+    els.actionItems.querySelectorAll("[data-act]").forEach(function (b) {
+      var act = b.getAttribute("data-act");
+      b.addEventListener("click", function () {
+        if (act === "upload") toast("Vault upload is not part of this prototype");
+        else if (act === "reuse") window.SchedulerUI.openScheduleModal(null, { kind: "dm", text: D.topDMs[0].text, audience: "new" });
+        else if (act === "schedule") window.SchedulerUI.openScheduleModal();
+        else if (act === "whale") window.SchedulerUI.openScheduleModal(null, {
+          kind: "dm", audience: "vip",
+          text: "hey " + D.whale.name.split(" ")[0] + " 🥺 missing you in here. sent you something 👀"
+        });
+        else if (act === "retention") { switchView("automations"); toast("Set up a win-back automation to catch these"); }
+      });
+    });
+  }
+
+  function renderOverview() { renderActionItems(); renderUpNext(); renderTips(); }
 
   /* ---------------- VIEW SWITCHING (tabs + nav) ---------------- */
   function switchView(view) {
@@ -195,14 +252,15 @@
   var mediaState = [];
 
   window.SchedulerUI = {
-    openScheduleModal: function (editId) {
+    openScheduleModal: function (editId, prefill) {
       var item = editId ? D.queue.filter(function (q) { return q.id === editId; })[0] : null;
       var isEdit = !!item;
-      var kind = item ? item.kind : "post";
+      var pf = (!item && prefill) ? prefill : {};
+      var kind = item ? item.kind : (pf.kind || "post");
       var whenVal = item ? toLocalInput(item.when) : toLocalInput(S.suggestTime({}));
-      var audience = item ? item.audience : "all";
-      var price = item ? item.price : 0;
-      var text = item ? item.text : "";
+      var audience = item ? item.audience : (pf.audience || "all");
+      var price = item ? item.price : (pf.price || 0);
+      var text = item ? item.text : (pf.text || "");
       mediaState = item && item.media ? item.media.slice() : [];
 
       var segOpts = D.segments.map(function (s) {
@@ -428,6 +486,7 @@
     els.stats = document.getElementById("statsRow");
     els.tips = document.getElementById("tipsList");
     els.upNext = document.getElementById("upNextCard");
+    els.actionItems = document.getElementById("actionItems");
     els.views = {
       scheduler: document.getElementById("view-scheduler"),
       automations: document.getElementById("view-automations")
