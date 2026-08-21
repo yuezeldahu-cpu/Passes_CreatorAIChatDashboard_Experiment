@@ -59,7 +59,6 @@
     var w = D.bestWindows(1)[0];
     var peak = D.DAYS[w.day] + " " + D.fmtHour(w.hour);
     var tips = [
-      { icon: "✦", title: "Ask your copilot anything", desc: "It schedules posts and mass DMs, prices them, and builds automations from a sentence." },
       { icon: "🕒", title: "Your fans peak at " + peak, desc: "Schedule your next drop then for the biggest reach." },
       { icon: "🔁", title: A.activeCount() + " automations running", desc: "New subscribers and win-backs are handled for you on autopilot." }
     ];
