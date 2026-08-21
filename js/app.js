@@ -92,7 +92,79 @@
     if (b) b.addEventListener("click", function () { switchView("scheduler"); });
   }
 
-  function renderOverview() { renderTips(); renderUpNext(); }
+  /* ---------------- ACTION ITEMS ---------------- */
+  function aitemRow(sev, icon, title, desc, act, btn) {
+    return '<div class="aitem"><div class="aitem__icon aitem__icon--' + sev + '">' + icon + '</div>' +
+      '<div class="aitem__body"><div class="aitem__title">' + title + '</div>' +
+      '<div class="aitem__desc">' + desc + '</div></div>' +
+      '<button class="btn btn--ghost btn--sm aitem__cta" data-act="' + act + '">' + btn + '</button></div>';
+  }
+
+  function renderActionItems() {
+    var now = new Date(), in3 = new Date(); in3.setDate(in3.getDate() + 3);
+    var soon = D.queue.filter(function (q) { return q.status === "scheduled" && q.when >= now && q.when <= in3; }).length;
+
+    var html = '<div class="card__head"><h3 class="card__title">Action items</h3><span class="pill">5</span></div>';
+    html += '<div class="actionlist" style="gap:0">';
+
+    // 1 — low content supply
+    html += aitemRow("warn", "📦", "Low content supply", "No vault uploads in 7 days.", "upload", "Upload");
+
+    // 2 — reuse top DMs with a new audience
+    html += '<div class="aitem aitem--block">' +
+      '<div class="aitem__blockhead"><div class="aitem__icon">🔁</div>' +
+      '<div class="aitem__body"><div class="aitem__title">Reuse top DMs with a new audience</div>' +
+      '<div class="aitem__desc">Your best performers, ready to resend.</div></div></div>' +
+      '<div class="dmreuse">';
+    D.topDMs.forEach(function (d, i) {
+      html += '<div class="dmrow"><span class="dmrow__thumb">' + d.emoji + '</span>' +
+        '<div class="dmrow__body"><div class="dmrow__text">' + S.esc(d.text) + '</div>' +
+        '<div class="dmrow__meta">Last used ' + d.lastUsed + '</div></div>' +
+        '<div class="dmrow__conv">' + d.conv + '% conv.</div>' +
+        '<button class="dmrow__btn" data-reuse="' + i + '" title="Reuse with a new audience">⟳</button></div>';
+    });
+    html += '</div></div>';
+
+    // 3 — queue running low
+    html += aitemRow("warn", "🗓️", "Keep your queue full",
+      soon ? (soon + " scheduled in the next 3 days. Add more to stay consistent.")
+           : "Nothing scheduled in the next 3 days.",
+      "schedule", "Schedule");
+
+    // 4 — whale going quiet
+    html += aitemRow("bad", "🐳", "Big fan going quiet",
+      D.whale.name + " (" + D.whale.spend + " lifetime) hasn't chatted in " + D.whale.days + " days.",
+      "whale", "Message");
+
+    // 5 — retention watch
+    html += aitemRow("bad", "🚩", "Watch: fans slipping away",
+      D.retention.cancelled + " memberships cancelled this week · " + D.retention.expiringSoon + " expiring soon.",
+      "retention", "Review");
+
+    html += '</div>';
+    els.actionItems.innerHTML = html;
+
+    els.actionItems.querySelectorAll("[data-reuse]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var d = D.topDMs[parseInt(b.getAttribute("data-reuse"), 10)];
+        window.SchedulerUI.openScheduleModal(null, { kind: "dm", text: d.text, audience: "new" });
+      });
+    });
+    els.actionItems.querySelectorAll("[data-act]").forEach(function (b) {
+      var act = b.getAttribute("data-act");
+      b.addEventListener("click", function () {
+        if (act === "upload") toast("Vault upload is not part of this prototype");
+        else if (act === "schedule") window.SchedulerUI.openScheduleModal();
+        else if (act === "whale") window.SchedulerUI.openScheduleModal(null, {
+          kind: "dm", audience: "vip",
+          text: "hey " + D.whale.name.split(" ")[0] + " 🥺 missing you in here. sent you something 👀"
+        });
+        else if (act === "retention") { switchView("automations"); toast("Set up a win-back automation to catch these"); }
+      });
+    });
+  }
+
+  function renderOverview() { renderActionItems(); renderUpNext(); renderTips(); }
 
   /* ---------------- VIEW SWITCHING (tabs + nav) ---------------- */
   function switchView(view) {
@@ -195,14 +267,15 @@
   var mediaState = [];
 
   window.SchedulerUI = {
-    openScheduleModal: function (editId) {
+    openScheduleModal: function (editId, prefill) {
       var item = editId ? D.queue.filter(function (q) { return q.id === editId; })[0] : null;
       var isEdit = !!item;
-      var kind = item ? item.kind : "post";
+      var pf = (!item && prefill) ? prefill : {};
+      var kind = item ? item.kind : (pf.kind || "post");
       var whenVal = item ? toLocalInput(item.when) : toLocalInput(S.suggestTime({}));
-      var audience = item ? item.audience : "all";
-      var price = item ? item.price : 0;
-      var text = item ? item.text : "";
+      var audience = item ? item.audience : (pf.audience || "all");
+      var price = item ? item.price : (pf.price || 0);
+      var text = item ? item.text : (pf.text || "");
       mediaState = item && item.media ? item.media.slice() : [];
 
       var segOpts = D.segments.map(function (s) {
@@ -428,6 +501,7 @@
     els.stats = document.getElementById("statsRow");
     els.tips = document.getElementById("tipsList");
     els.upNext = document.getElementById("upNextCard");
+    els.actionItems = document.getElementById("actionItems");
     els.views = {
       scheduler: document.getElementById("view-scheduler"),
       automations: document.getElementById("view-automations")
